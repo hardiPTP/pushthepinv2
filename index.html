@@ -40,7 +40,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
   border-radius:44px; overflow:hidden; flex:0 0 auto;
   box-shadow:0 0 0 10px #191713, 0 26px 60px rgba(0,0,0,.28);
 }
-#app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;z-index:2}
+#app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;z-index:2;padding-top:max(14px,env(safe-area-inset-top))}
 #lmap{position:absolute;inset:0;display:none;z-index:1;background:var(--line);cursor:grab}
 #lmap.on{display:block}
 #app.overmap{background:transparent;pointer-events:none}
@@ -318,6 +318,10 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .star{color:var(--blue)} .star.off{color:#D8D2C7}
 
 /* ── developer panel (outside the phone) ─────────────────────────────── */
+#cc{position:absolute;right:0;top:46%;width:16px;height:58px;z-index:150;background:none;border:0;padding:0;
+  display:flex;align-items:center;justify-content:center}
+#cc::before{content:'';width:4px;height:48px;border-radius:3px;background:rgba(23,19,15,.22)}
+#cc:active::before{background:var(--blue)}
 #dev{position:absolute;inset:0;z-index:200;background:rgba(23,19,15,.5);display:none}
 #dev.on{display:block}
 #devPanel{position:absolute;left:0;right:0;bottom:0;max-height:84%;overflow-y:auto;background:#fff;
@@ -1012,6 +1016,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <div id="lmap"></div>
   <div id="app"></div>
   <div id="dev"><div id="devPanel"></div></div>
+  <button id="cc" aria-label="Master control"></button>
 </div>
 
 <script>
@@ -1392,13 +1397,7 @@ function advance(d){
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const a = (act, cls, inner, extra='') => `<button data-a="${act}" class="${cls}" ${extra}>${inner}</button>`;
 
-function statusBar(){
-  return `<div class="sbar"><b>${new Date(S.now).getHours()}:${String(new Date(S.now).getMinutes()).padStart(2,'0')}</b>
-    <span class="sp"></span>
-    ${S.offline ? `<span class="small" style="color:var(--mid);margin-right:8px">no signal</span>` : ''}
-    <span class="bars"><i style="height:3.5px"></i><i style="height:5.5px"></i><i style="height:8px"></i><i style="height:11px${S.offline?';opacity:.25':''}"></i></span>
-    <span class="batt"><u></u><s></s></span></div>`;
-}
+function statusBar(){ return ''; }
 function avatarEl(p, size){
   if (!p || !p.av) return `<span class="avatar" style="width:${size}px;height:${size}px;background:#E4DFD6;display:block"></span>`;
   return `<img class="avatar" style="width:${size}px;height:${size}px" src="${p.av}">`;
@@ -1468,7 +1467,7 @@ function pinCard(p, opts={}){
     ${opts.overflow!==false ? a('menu:'+p.id,'tapfx',ic('dots',18,'color:var(--mute)'),'style="margin-left:8px"') : ''}
   </div>`);
 
-  parts.push(`<div class="h3" style="margin-top:7px">${esc(p.title)}</div>`);
+  parts.push(`<div class="h3" style="margin-top:7px;font-size:22px;line-height:28px;letter-spacing:-.4px">${esc(p.title)}</div>`);
 
   const bl = [];
   if (au) bl.push(`${avatarEl(au,24)}<b>${esc(au.name)}</b>`);
@@ -2849,26 +2848,21 @@ document.getElementById('dev').addEventListener('click', e=>{
   }
 });
 
-/* the master control lives behind a long press on the status bar */
+/* the master control opens from the tab on the right edge */
 function devOpen(on){ document.getElementById('dev').classList.toggle('on', on); if (on) renderDev(); }
-(function longPress(){
-  let timer=null, x0=0, y0=0;
-  const phone=document.getElementById('phone');
-  const cancel=()=>{ clearTimeout(timer); timer=null; };
-  phone.addEventListener('pointerdown', e=>{
-    if (!e.target.closest('.sbar')) return;
-    x0=e.clientX; y0=e.clientY;
-    timer=setTimeout(()=>{ timer=null; devOpen(true);
-      if (navigator.vibrate) navigator.vibrate(8); }, 550);
+(function(){
+  const tab=document.getElementById('cc');
+  tab.addEventListener('click', ()=>{
+    const el=document.getElementById('dev');
+    devOpen(!el.classList.contains('on'));
+    if (navigator.vibrate) navigator.vibrate(8);
   });
-  phone.addEventListener('pointermove', e=>{
-    if (timer && (Math.abs(e.clientX-x0)>10 || Math.abs(e.clientY-y0)>10)) cancel();
+  document.addEventListener('keydown', e=>{
+    if (e.key==='d' && !/input|textarea/i.test(e.target.tagName||'')) devOpen(!document.getElementById('dev').classList.contains('on'));
   });
-  ['pointerup','pointercancel','pointerleave'].forEach(k=>phone.addEventListener(k, cancel));
-  phone.addEventListener('contextmenu', e=>{ if (e.target.closest('.sbar')) e.preventDefault(); });
 })();
 
 startLocate();
-setTimeout(()=>{ if (!S.toast) toast('Hold the status bar for the master control.'); }, 2600);
+setTimeout(()=>{ if (!S.toast) toast('Pull the tab on the right for the master control.'); }, 2600);
 
 </script>
