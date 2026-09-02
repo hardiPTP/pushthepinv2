@@ -165,6 +165,9 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 
 /* ── vote ────────────────────────────────────────────────────────────── */
 .votes{display:flex;gap:8px;width:100%}
+.votes.compact{width:auto;flex:0 0 auto}
+.votes.compact .vote{flex:0 0 auto;padding:8px 13px 8px 11px;font-size:12.5px;gap:6px}
+.cardfoot{flex-wrap:nowrap}
 .vote{flex:1 0 0;min-width:0;background:#fff;border:1.5px solid var(--blueEdge);border-radius:999px;
   padding:9.5px 16px 9.5px 14px;display:flex;align-items:center;justify-content:center;gap:7px;
   font-size:13px;line-height:18px;font-weight:700;color:var(--body)}
@@ -227,7 +230,14 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
   transition:transform .16s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 .sw.on{background:var(--warn)} .sw.on i{transform:translateX(18px)}
 .sw.ev.on{background:var(--ink)}
-.chipdock{border-top:1px solid var(--line);background:var(--paper);padding:12px 16px;display:flex;gap:8px;flex:0 0 auto}
+.kindrow{display:flex;gap:8px;padding:12px 16px 0;background:var(--paper);flex:0 0 auto}
+.kind{flex:1 0 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;
+  background:#fff;border:1px solid var(--line);border-radius:999px;padding:12px 10px;font-size:13px}
+.kind b{font-size:13px;white-space:nowrap}
+.kind.on.issue{background:var(--warn);border-color:var(--warn);color:#fff}
+.kind.on.event{background:var(--blue);border-color:var(--blue);color:#fff}
+.kind.off{opacity:.42}
+.chipdock{background:var(--paper);padding:12px 16px;display:flex;gap:8px;flex:0 0 auto}
 .chip{flex:1 0 0;min-width:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-chip);
   height:59px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--mid)}
 .chip b{font-size:11px;line-height:16px;color:var(--faint)}
@@ -1202,7 +1212,7 @@ const S = {
   intent:null,                // saved write action across sign in
   draft:null,
   toast:null,
-  reads:0, wallSeen:false, auth_mode:'in', detecting:false, roadDraft:null, mapPin:null, tileFail:false,
+  reads:0, wallSeen:false, auth_mode:'in', detecting:false, roadDraft:null, mapPin:null, tileFail:false, mapPick:null, pickRoad:null,
   auth_err:'', auth_phone:'', auth_code:'', auth_name:'', auth_roads:['waterfield','waroda','chapel'],
   locTimer:null, focus:null,
 };
@@ -1434,6 +1444,8 @@ function voteRow(p, where){
     const winner = not>fixed ? ['not fixed', not] : ['fixed', fixed];
     line = `<button data-a="wsw:${p.id}" class="majority"><b>${winner[1]}</b> people marked ${winner[0]} ${ic('chevron',11,'color:var(--mute)')}</button>`;
   }
+  if (where==='row') return {votes:`${b('fixed','Fixed','tick',fixed)}${b('notfixed','Not fixed','cross',not)}`, line,
+    note: mine ? `You said ${mine.value==='fixed'?'fixed':'not fixed'} on ${fmtShort(mine.at)}. Tap it again to take it back.${mine.pending?' Held until you are back on.':''}` : (dormant(p)?'Nobody has answered in thirty days.':'')};
   return `<div class="stack" style="gap:11px">
     <div class="votes">${b('fixed','Fixed','tick',fixed)}${b('notfixed','Not fixed','cross',not)}</div>
     ${line}
@@ -1485,16 +1497,21 @@ function pinCard(p, opts={}){
     parts.push(`<div class="statusline" style="margin-top:12px"><b>${w}</b>${rest?' '+esc(rest):''}
       ${st==='filed'? a('retry:'+p.id,'','<span style="color:var(--blueInk);font-weight:700;margin-left:8px">Send it now</span>') : ''}</div>`);
     parts.push(`<div class="rule" style="margin-top:13px"></div>`);
-    if (voteOpen(p)) parts.push(`<div style="margin-top:13px">${voteRow(p,'card')}</div>`);
   } else {
     parts.push(`<div class="rule" style="margin-top:14px"></div>`);
   }
 
   const foot = [];
-  if (p.kind==='issue') foot.push(`<button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',17)}Support <span class="n">${p.supports}</span></button>`);
+  const vr = (p.kind==='issue' && voteOpen(p)) ? voteRow(p,'row') : null;
+  if (vr) foot.push(`<span class="votes compact">${vr.votes}</span><span style="flex:1"></span>`);
+  if (p.kind==='issue') foot.push(`<button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',17)}${vr?'':'Support '}<span class="n">${p.supports}</span></button>`);
   if (p.kind==='event') foot.push(`<button data-a="interest:${p.id}" class="react ${p.interestedByMe?'on':''}">${p.interested} interested</button>`);
-  foot.push(`<button data-a="open:${p.id}" class="react">${ic('comment',17)}Comment <span class="n">${replyCount(p)}</span></button>`);
+  foot.push(`<button data-a="open:${p.id}" class="react">${ic('comment',17)}${vr?'':'Comment '}<span class="n">${replyCount(p)}</span></button>`);
   parts.push(`<div class="cardfoot" style="margin-top:13px">${foot.join('')}</div>`);
+  if (vr){
+    parts.push(`<div class="rule" style="margin-top:13px"></div>`);
+    parts.push(`<div style="margin-top:12px">${vr.line}${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}</div>`);
+  }
 
   return `<div class="pincard" data-a="open:${p.id}">${parts.join('')}</div>`;
 }
@@ -1520,12 +1537,12 @@ function feedScreen(){
   const list = visiblePins();
   const r = S.currentRoad ? road(S.currentRoad) : null;
   const head = `<div class="header">
-    <div>
+    <button data-a="roads" style="text-align:left">
       <div style="display:flex;gap:6px;align-items:center">
         <b class="subhead">${r?esc(r.label||r.name):'Bandra West'}</b>${ic('chevdown',14)}
       </div>
       <div class="meta">${r?esc(r.address.split(',').slice(0,2).join(',')):'Mumbai'}</div>
-    </div>
+    </button>
     <div style="display:flex;gap:10px;align-items:center">
       ${a('map','circbtn tapfx',ic('map',18))}
       ${S.auth==='out' ? a('signin','pill','Sign in','style="background:#fff;border:1px solid var(--line);padding:11px 18px;font-size:14px"')
@@ -1560,9 +1577,9 @@ function gatherScreen(){
 function homeScreen(){
   const fresh = S.pins.filter(p=>days(p.created,S.now)<=2).length;
   const d = new Date(S.now);
-  return `<div class="header"><div>
-      <div style="display:flex;gap:6px;align-items:center"><b class="subhead">Home</b>${ic('chevdown',14)}</div>
-      <div class="meta">${S.currentRoad?esc(road(S.currentRoad).address.split(',').slice(0,2).join(',')):'Bandra West'}</div></div>
+  return `<div class="header"><button data-a="roads" style="text-align:left">
+      <div style="display:flex;gap:6px;align-items:center"><b class="subhead">${S.currentRoad?esc(road(S.currentRoad).label||road(S.currentRoad).name):'Home'}</b>${ic('chevdown',14)}</div>
+      <div class="meta">${S.currentRoad?esc(road(S.currentRoad).address.split(',').slice(0,2).join(',')):'Bandra West'}</div></button>
     <div style="display:flex;gap:10px;align-items:center">${a('map','circbtn tapfx',ic('map',18))}
       ${S.auth==='out'?a('signin','pill','Sign in','style="background:#fff;border:1px solid var(--line);padding:11px 18px;font-size:14px"'):`<img class="avatar" style="width:38px;height:38px" src="${P.me.av}">`}</div></div>
     <div class="scroll"><div class="feed" style="gap:20px">
@@ -1668,12 +1685,17 @@ function pinScreen(id){
 
     if (voteOpen(p)) parts.push(`<div style="padding:12px 20px 0"><div class="card" style="border-color:var(--edge);padding:16px">
       <div class="subhead">Is it fixed now?</div><div style="height:12px"></div>
-      ${voteRow(p,'detail')}</div></div>`);
+      ${(()=>{const vr=voteRow(p,'row');return `<div class="cardfoot" style="gap:8px">
+        <span class="votes compact">${vr.votes}</span><span style="flex:1"></span>
+        <button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',17)}<span class="n">${p.supports}</span></button>
+        <button data-a="focuscomment" class="react">${ic('comment',17)}<span class="n">${replyCount(p)}</span></button></div>
+        <div class="rule" style="margin:13px 0"></div>${vr.line}
+        ${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}`;})()}</div></div>`);
     else if (st!=='filed') parts.push(`<div style="padding:12px 20px 0"><div class="notice flat">
       ${ic('lock',16,'color:var(--mute)')}<div>The road answers once the ward claims a fix, or after seven days of silence.
       ${days(p.created,S.now)<7?`Day ${days(p.created,S.now)+1} of seven.`:''}</div></div></div>`);
 
-    parts.push(`<div style="padding:14px 20px 0"><div style="display:flex;gap:10px;align-items:center">
+    if (!voteOpen(p)) parts.push(`<div style="padding:14px 20px 0"><div style="display:flex;gap:10px;align-items:center">
       <div class="byline" style="gap:5px"><b style="font-size:14px">${p.supports}</b><span style="font-size:14px">supported</span></div>
       <span style="flex:1"></span>
       <button data-a="support:${p.id}" class="pill" style="background:var(--blue);color:#fff;padding:10px 16px;font-size:14px">
@@ -1685,6 +1707,7 @@ function pinScreen(id){
       <button data-a="interest:${p.id}" class="pill" style="background:var(--blue);color:#fff;padding:10px 16px;font-size:14px">
         ${p.interestedByMe?'Interested':'I am interested'}</button></div></div>`);
 
+  parts.push(locSnippet(p));
   parts.push(`<div style="padding:16px 20px 0"><div class="card" style="border-color:var(--edge);padding:16px 16px 6px">
     <div style="display:flex;gap:8px;align-items:baseline"><span class="subhead">Replies</span>
       <span class="body mute">${replyCount(p)}</span></div>
@@ -1773,21 +1796,29 @@ function composerScreen(){
       <span style="flex:1"></span>
       <button data-a="post" class="cPost ${ok?'on':''}" ${ok?'':'disabled'}>${d.issue?'Send':'Post'}</button>
     </div>
+    <div style="padding:0 20px 6px">
+      ${a('postingas','card','<span style="padding:11px 14px;display:flex;align-items:center;gap:11px;width:100%">'
+        + (d.named||d.issue ? `<img class="avatar" style="width:28px;height:28px" src="${P.me.av}">`
+            : '<span style="width:28px;height:28px;border-radius:999px;background:var(--line);display:block"></span>')
+        + '<span style="flex:1"><span class="metaQ" style="display:block">Posting as</span>'
+        + '<span class="bodyStrong" style="font-size:15px">'+(d.issue||d.named?esc(P.me.name):'A neighbour')+'</span></span>'
+        + (d.issue?'<span class="metaQ">A report carries your name</span>':ic('chevdown',14,'color:var(--mute)'))
+        +'</span>','style="width:100%;display:block"'+(d.issue?' disabled':''))}
+    </div>
     <div class="cBody">
       <div class="cText" contenteditable="plaintext-only" data-in="text" data-ph="What is happening here?"
         >${d.text.split('\n').map((l,i)=>i?'<div>'+(esc(l)||'<br>')+'</div>':esc(l)).join('')}</div>
       ${blocks.join('')}
       ${!ok&&why?`<div class="reason">${ic('warning',14,'color:var(--redInk)')}${why}</div>`:''}
-      ${sw('issue', d.issue, false, 'warning','Report an issue', d.issue?'Goes to the ward as a complaint':'Goes to the ward as a complaint')}
-      ${sw('event', d.event, d.issue, 'calendar','It is an event',
-          d.issue?'Not while this is a report':'Add a date and people can say they are interested')}
       ${d.issue?`<div class="wardpanel"><div class="t">${ic('bldg',16,'color:var(--warn)')}H West ward, MCGM</div>
         <div class="b">Posting files a complaint and gives you a number you can check.</div></div>`:''}
-      <button data-a="sw:named" class="switchcard ${d.issue?'off':''}">
-        ${avatarEl(P.me,30)}<div style="flex:1"><div class="bodyStrong">${esc(P.me.name)}</div>
-        <div class="metaQ">${d.issue?'A report always carries your name':'Your name and your road show'}</div></div>
-        <span class="sw ev ${d.named||d.issue?'on':''}"><i></i></span></button>
       <div style="height:12px"></div>
+    </div>
+    <div class="kindrow">
+      <button data-a="sw:issue" class="kind ${d.issue?'on issue':''} ${d.event?'off':''}">
+        ${ic('warning',16, d.issue?'color:#fff':'color:var(--warn)')}<b>Raising an issue?</b></button>
+      <button data-a="sw:event" class="kind ${d.event?'on event':''} ${d.issue?'off':''}">
+        ${ic('calendar',16, d.event?'color:#fff':'color:var(--blueInk)')}<b>Or an event?</b></button>
     </div>
     <div class="chipdock">
       ${chip('photo','camera','Photo', false, d.photos.length>0)}
@@ -1827,6 +1858,7 @@ function roadsScreen(){
         +(S.detecting?'Finding your road':'Use my location')+'</span><span class="metaQ">'
         +(S.detecting?'One moment':'Sets the road you are on now')+'</span></span>'
         +ic('chevron',12,'color:var(--mute)')+'</span>','style="margin-top:16px;display:block;width:100%"')}
+      ${a('mappick:now','searchfield','<span style="display:flex;gap:10px;align-items:center;width:100%">'+ic('map',18,'color:var(--mute)')+'<span class="body mid" style="font-size:15px">Pick it on the map</span></span>','style="margin-top:10px;width:100%"')}
       ${a('addroad','searchfield','<span style="display:flex;gap:10px;align-items:center;width:100%">'+ic('search',18,'color:var(--mute)')+'<span class="body mid" style="font-size:15px">Search for a road</span></span>','style="margin-top:10px;width:100%"')}
       <div style="display:flex;align-items:baseline;margin:18px 0 10px">
         <span class="sectlabel">For pulse</span><span style="flex:1"></span>
@@ -1990,6 +2022,31 @@ function authScreen(which){
 
 
 
+
+/* ── a still map snippet for the pin ─────────────────────────────────── */
+function tileURL(lat,lng,z){
+  const n=Math.pow(2,z);
+  const x=Math.floor((lng+180)/360*n);
+  const la=lat*Math.PI/180;
+  const y=Math.floor((1-Math.log(Math.tan(la)+1/Math.cos(la))/Math.PI)/2*n);
+  const fx=((lng+180)/360*n)-x;
+  const fy=((1-Math.log(Math.tan(la)+1/Math.cos(la))/Math.PI)/2*n)-y;
+  return {url:`https://tile.openstreetmap.org/${z}/${x}/${y}.png`, fx, fy};
+}
+function locSnippet(p){
+  const [lat,lng]=pinXY(p); const t=tileURL(lat,lng,16); const r=road(p.road);
+  return `<div style="padding:16px 20px 0"><button data-a="pinmap:${p.id}" class="card" style="width:100%;overflow:hidden;display:block">
+    <div style="position:relative;height:132px;background:var(--line)">
+      <img src="${t.url}" style="position:absolute;width:420px;height:420px;left:50%;top:50%;
+        transform:translate(-50%,-50%) translate(${Math.round((0.5-t.fx)*420)}px,${Math.round((0.5-t.fy)*420)}px);max-width:none">
+      <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);color:var(--blue)">${ic('place',34)}</span>
+    </div>
+    <div style="padding:13px 16px;display:flex;align-items:center;gap:10px">
+      <span style="flex:1"><span class="bodyStrong" style="display:block;font-size:15px">${esc(r.name)}${p.spot?', '+esc(p.spot):''}</span>
+      <span class="metaQ">${esc(r.address)}</span></span>
+      ${ic('chevron',12,'color:var(--mute)')}</div></button></div>`;
+}
+
 /* ── the story ───────────────────────────────────────────────────────── */
 function storyItems(){
   return S.pins.slice().sort((a,b)=>(b.wardLast||b.created)-(a.wardLast||a.created)).slice(0,8);
@@ -2013,41 +2070,57 @@ function storyScreen(){
   const i=Math.max(0,Math.min(S.story||0, items.length-1));
   const p=items[i];
   if (!p) return '';
+  const r=road(p.road);
   const art = p.photos&&p.photos.length
     ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover">`
-    : `<div style="width:100%;height:100%;background:var(--blueSoft);display:flex;align-items:center;justify-content:center;color:var(--blueInk)">${ic(MICO[p.kind]||'place',64)}</div>`;
-  return `<div style="position:absolute;inset:0;background:var(--paper);display:flex;flex-direction:column">
-    <div style="position:absolute;left:0;right:0;top:0;height:56%;overflow:hidden">${art}</div>
+    : `<div style="width:100%;height:100%;background:var(--blueSoft);display:flex;align-items:center;justify-content:center;color:var(--blueInk)">${ic(MICO[p.kind]||'place',72)}</div>`;
+  const faces = ['rhea','aamir','khanna'].map(k=>`<img src="${P[k].av}" style="width:26px;height:26px;border-radius:999px;margin-right:-8px;border:2px solid #fff;object-fit:cover">`).join('');
+  return `<div style="position:absolute;inset:0;background:#000;display:flex;flex-direction:column">
+    <div style="position:absolute;inset:0;overflow:hidden">${art}</div>
     <div style="position:absolute;left:0;right:0;top:14px;padding:0 20px;display:flex;align-items:center;gap:10px;z-index:3">
-      ${a('storyclose','circbtn tapfx',ic('back',18))}
-      <div style="flex:1;text-align:center;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)">
-        <div class="bodyStrong" style="font-size:13px">Since 7:30PM yesterday</div>
-        <div class="meta" style="color:rgba(255,255,255,.85)">${i+1} of ${items.length}</div></div>
-      <span style="width:38px"></span></div>
-    <button data-a="storystep:-1" style="position:absolute;left:0;top:0;bottom:290px;width:38%;z-index:2"></button>
-    <button data-a="storystep:1"  style="position:absolute;right:0;top:0;bottom:290px;width:38%;z-index:2"></button>
+      ${a('storystep:-1','circbtn tapfx',ic('back',18))}
+      <div style="flex:1;text-align:center;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.55)">
+        <div class="bodyStrong" style="font-size:13px">Since ${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date(S.now-DAY).getDay()].toLowerCase()} evening</div>
+        <div class="meta" style="color:rgba(255,255,255,.9)">${i+1} of ${items.length}</div></div>
+      ${a('storyclose','circbtn tapfx',ic('close',17))}</div>
+    <button data-a="storystep:-1" style="position:absolute;left:0;top:0;bottom:300px;width:38%;z-index:2"></button>
+    <button data-a="storystep:1"  style="position:absolute;right:0;top:0;bottom:300px;width:38%;z-index:2"></button>
     <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:var(--r-sheet) var(--r-sheet) 0 0;
-      padding:18px 20px calc(20px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;z-index:3">
-      <div class="kicker"><span class="place"><b>${esc(road(p.road).name)}</b>${p.spot?', '+esc(p.spot):''}</span>
+      padding:10px 20px calc(18px + env(safe-area-inset-bottom));z-index:3">
+      <div class="grab"></div>
+      <div class="kicker" style="margin-top:2px">
+        <span class="place"><b>${esc(r.name)}</b>${p.spot?', '+esc(p.spot):''}</span>
+        ${p.author==='me'?'<span class="byyou">by you</span>':''}
         <span class="t">${ago(p.wardLast||p.created)}</span></div>
-      <div class="h3" style="font-size:22px;line-height:28px">${esc(storyHead(p))}</div>
-      <div class="body clamp" style="-webkit-line-clamp:3">${esc(p.text||'')}</div>
-      <div class="rule" style="margin:4px 0"></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="bodyStrong">${p.supports||0}</span><span class="meta">backed</span>
+      <div class="h2" style="font-size:26px;line-height:32px;margin-top:8px">${esc(storyHead(p))}</div>
+      <div class="body" style="margin-top:6px">${esc(p.text||'')}</div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+        <span style="display:flex">${faces}</span>
+        <span class="bodyStrong" style="font-size:15px;margin-left:6px">${p.supports||0}</span>
+        <span class="body mid">supported</span>
         <span style="flex:1"></span>
-        ${a('open:'+p.id,'btn-ghost','Open the pin','style="width:auto;padding:11px 18px"')}</div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:2px">
-        ${a('storystep:-1','circbtn tapfx',ic('back',16))}
-        <div style="flex:1;display:flex;gap:6px;align-items:center;justify-content:center">
-          ${items.map((x,k)=>`<i style="display:block;height:4px;border-radius:2px;background:${k===i?'var(--ink)':'rgba(23,19,15,.18)'};width:${k===i?'26px':'7px'}"></i>`).join('')}</div>
-        ${a('storystep:1','circbtn tapfx',ic('back',16,'transform:rotate(180deg)'))}</div>
+        ${a('open:'+p.id,'pill','Open','style="background:var(--blueSoft);color:var(--blueInk);padding:9px 16px;font-size:13px"')}</div>
+      <div class="rule" style="margin:14px 0"></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        ${a('storystep:-1','','<span style="width:44px;height:44px;border-radius:14px;background:var(--blueSoft);color:var(--blueInk);display:flex;align-items:center;justify-content:center">'+ic('back',18)+'</span>')}
+        <div style="flex:1;display:flex;gap:8px;align-items:center;justify-content:center">
+          ${items.map((x,k)=>`<i style="display:block;height:5px;border-radius:3px;background:${k===i?'var(--ink)':'var(--blueLift)'};width:${k===i?'34px':'6px'}"></i>`).join('')}</div>
+        ${a('storystep:1','','<span style="width:44px;height:44px;border-radius:14px;background:var(--blueSoft);color:var(--blueInk);display:flex;align-items:center;justify-content:center">'+ic('back',18,'transform:rotate(180deg)')+'</span>')}
+      </div>
+      <button data-a="open:${p.id}" class="metaQ" style="display:flex;gap:7px;align-items:center;justify-content:center;width:100%;margin-top:12px">
+        ${ic('up',13,'color:var(--mute)')}Swipe up for the whole pin</button>
     </div></div>`;
 }
-
 /* ── map, OpenStreetMap ──────────────────────────────────────────────── */
 const ROADXY={waterfield:[19.0604,72.8281],waroda:[19.0611,72.8272],chapel:[19.0618,72.8262],
   veronica:[19.0608,72.8265],hill:[19.0570,72.8290],nargis:[19.0490,72.8210],perry:[19.0640,72.8300],pali:[19.0662,72.8252]};
+function nearestRoad(lat,lng){
+  let best=null,bd=1e9;
+  Object.keys(ROADXY).forEach(id=>{ if(!road(id)) return;
+    const d=Math.hypot(ROADXY[id][0]-lat, ROADXY[id][1]-lng);
+    if(d<bd){bd=d;best=id;} });
+  return best;
+}
 function pinXY(p){ const b=ROADXY[p.road]||[19.0596,72.8295];
   const h=[...p.id].reduce((a,c)=>a+c.charCodeAt(0),0);
   return [b[0]+((h%13)-6)*0.00022, b[1]+((h%17)-8)*0.00022]; }
@@ -2071,6 +2144,7 @@ function initMap(){
 function drawMarkers(){
   if (!MAP) return;
   Object.keys(MARKERS).forEach(k=>MAP.removeLayer(MARKERS[k])); MARKERS={};
+  if (S.mapPick) return;
   visiblePins().forEach(p=>{
     const sel = S.mapPin===p.id;
     const html = `<div class="mrk ${sel?'sel':''}" style="background:${MCOL[p.kind]||'var(--ink)'};color:#fff">${ic(MICO[p.kind]||'place',16)}</div>`;
@@ -2078,6 +2152,12 @@ function drawMarkers(){
     m.on('click', e=>{ L.DomEvent.stopPropagation(e); S.mapPin=p.id; render(); MAP.panTo(pinXY(p),{animate:true}); });
     MARKERS[p.id]=m;
   });
+}
+function onMapMove(){
+  if (!MAP || !S.mapPick) return;
+  const c=MAP.getCenter(); const id=nearestRoad(c.lat,c.lng);
+  if (id && id!==S.pickRoad){ S.pickRoad=id;
+    const el=document.getElementById('pickroad'); if(el) el.textContent=road(id).name; }
 }
 function stepMap(dir){
   const l=visiblePins(); if(!l.length) return;
@@ -2089,11 +2169,23 @@ function stepMap(dir){
 function mapScreen(){
   const p = S.mapPin?pin(S.mapPin):null;
   const n = visiblePins().length;
+  if (S.mapPick) return `<div class="header" style="background:var(--paper);border-bottom:1px solid var(--line)">
+      ${a('mapcancel','circbtn tapfx',ic('close',17))}
+      <div style="flex:1;margin-left:12px"><div class="subhead">Drop the pin</div>
+        <div class="meta">Move the map, the centre is the spot</div></div></div>
+    <div class="mapgap" style="position:relative">
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);pointer-events:none;color:var(--blue)">${ic('place',44)}</div>
+    </div>
+    <div class="mapcard">
+      <div class="metaQ">Nearest road</div>
+      <div class="subhead" id="pickroad" style="font-size:19px">${esc(road(S.pickRoad||S.currentRoad).name)}</div>
+      ${a('mapuse','btn-blue','Use this spot')}
+    </div>${bottomBar()}`;
   return `<div class="header" style="background:var(--paper);border-bottom:1px solid var(--line)">
       ${a('back','circbtn tapfx',ic('back',18))}
       <div style="flex:1;margin-left:12px"><div class="subhead">Bandra West</div>
         <div class="meta">${n} pins on your roads</div></div>
-      ${a('roads','circbtn tapfx',ic('place',18))}</div>
+      ${a('mappick:now','circbtn tapfx',ic('place',18))}</div>
     ${S.tileFail?`<div style="padding:10px 16px 0"><div class="notice warn">${ic('warning',16)}
       <div><b>The map needs a connection</b><br>Pins still show and still open.</div></div></div>`:''}
     <div class="mapgap"></div>
@@ -2149,6 +2241,17 @@ function sheetView(s){
     case 'price': return priceSheet(s);
     case 'poll':  return pollSheet(s);
     case 'photo': return photoSheet(s);
+    case 'named': return `<div class="grab"></div>${sheetHead('Posting as','Your road shows either way.')}
+      <div class="sheetBody"><div class="rows">
+        <button data-a="setnamed:1" class="row"><img class="avatar" style="width:32px;height:32px" src="${P.me.av}">
+          <div class="c"><div class="bodyStrong" style="font-size:15px">${esc(P.me.name)}</div>
+          <div class="metaQ">Neighbours see your name</div></div>
+          ${S.draft.named?ic('tick',16,'color:var(--blueInk)'):''}</button>
+        <button data-a="setnamed:0" class="row"><span style="width:32px;height:32px;border-radius:999px;background:var(--line);display:block"></span>
+          <div class="c"><div class="bodyStrong" style="font-size:15px">A neighbour</div>
+          <div class="metaQ">Your name is kept off the pin</div></div>
+          ${!S.draft.named?ic('tick',16,'color:var(--blueInk)'):''}</button>
+      </div><div style="height:12px"></div></div>`;
     case 'roadpick': return roadPickSheet(s);
     case 'swap':  return swapSheet(s);
     case 'discard': return `<div class="grab"></div>${sheetHead('Leave this pin?','')}
@@ -2312,7 +2415,9 @@ function photoSheet(){
 function roadPickSheet(){
   const list = S.roads.filter(r=>r.added);
   return `<div class="grab"></div>${sheetHead('Which road?','A pin belongs to a road before anything else.')}
-    <div class="sheetBody"><div class="rows">${list.map(r=>`
+    <div class="sheetBody">
+    ${a('mappick:draft','btn-ghost',ic('map',15,'color:var(--blueInk)')+' Pick it on the map','style="margin-bottom:12px"')}
+    <div class="rows">${list.map(r=>`
       <button data-a="draftroad:${r.id}" class="row"><div class="c">
         <div class="bodyStrong" style="font-size:15px">${esc(r.name)}</div>
         <div class="metaQ trunc">${esc(r.address)}</div></div>
@@ -2474,13 +2579,24 @@ function act(cmd, p1, p2){
     /* auth */
     case 'go': S.sheets=[]; if(topR().n==='wall') S.stack.pop(); return push({n:'auth', which:p1});
     case 'wallno': S.intent=null; return pop();
-    case 'map': return push({n:'map'});
+    case 'map': S.mapPick=null; return push({n:'map'});
+    case 'mappick': S.mapPick=p1||'now'; S.mapPin=null; S.sheets=[]; S.pickRoad=(S.mapPick==='draft'&&S.draft?S.draft.road:S.currentRoad);
+      if (topR().n!=='map') push({n:'map'}); else render();
+      setTimeout(()=>{ if(MAP){ MAP.off('move',onMapMove); MAP.on('move',onMapMove); onMapMove(); } },120);
+      return;
+    case 'mapcancel': S.mapPick=null; if(topR().n==='map'&&S.stack.length>1) return pop(); return render();
+    case 'mapuse': {
+      const id=S.pickRoad||S.currentRoad, r=road(id); r.added=true;
+      if (S.mapPick==='draft'){ S.draft.road=id; S.mapPick=null; pop(); toast('Pin goes on '+r.name+'.'); return; }
+      S.currentRoad=id; r.lastOpened=S.now; S.mapPick=null; pop(); toast('Now on '+r.name+'.'); return; }
     case 'story': S.story=+(p1||0); return push({n:'story'});
     case 'storystep': { const items=storyItems(); let n=(S.story||0)+ +p1;
       if (n<0) n=0; if (n>items.length-1){ return pop(); }
       S.story=n; return render(); }
     case 'storyclose': return pop();
     case 'mapstep': return stepMap(+p1);
+    case 'pinmap': S.mapPick=null; S.mapPin=p1; push({n:'map'});
+      setTimeout(()=>{ if(MAP){ const p=pin(S.mapPin); MAP.setView(pinXY(p),17); } },200); return;
     case 'roadcfg': S.roadDraft=null; return push({n:'roadcfg', id:p1});
     case 'roadlabel': S.roadDraft.label = (p1==='None'?'':p1); return render();
     case 'roadpulse': S.roadDraft.pinned = !S.roadDraft.pinned; return render();
@@ -2497,6 +2613,9 @@ function act(cmd, p1, p2){
       const r=road(p1); r.added=false; r.pinned=false;
       if (S.currentRoad===p1) S.currentRoad = (S.roads.find(x=>x.pinned)||S.roads[0]).id;
       S.roadDraft=null; pop(); toast('Removed. What was said there stays.'); return; }
+    case 'postingas': if(S.draft.issue) return; return openSheet({n:'named'});
+    case 'setnamed': S.draft.named = p1==='1'; S.sheets.pop(); return render();
+    case 'focuscomment': { const el=document.getElementById('commentbox'); if(el){el.scrollIntoView({block:'center'});el.focus();} return; }
     case 'setnow': { const r=road(p1); S.currentRoad=p1; r.lastOpened=S.now; render(); return toast('Now on '+r.name+'.'); }
     case 'detect': {
       if (S.detecting) return;
