@@ -49,6 +49,11 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .mrk{width:34px;height:34px;border-radius:999px;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;
   box-shadow:0 3px 8px rgba(23,20,15,.28)}
 .mrk.sel{box-shadow:0 0 0 4px rgba(0,71,171,.35), 0 3px 8px rgba(23,20,15,.3)}
+.actbar{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 8px;display:flex;align-items:center;gap:2px;
+  filter:drop-shadow(0 6px 5px rgba(23,20,15,.07))}
+.astack{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 11px;border-radius:16px}
+.astack b{font-size:11px;line-height:14px;letter-spacing:-.1px;white-space:nowrap}
+.astack.on{background:var(--blueSoft)}
 .mapcard{position:absolute;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:22;
   background:#fff;border-radius:var(--r-card);border:1px solid var(--line);box-shadow:0 10px 26px rgba(23,20,15,.14);
   padding:15px 16px;display:flex;flex-direction:column;gap:10px}
@@ -213,7 +218,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .cHead .road{display:flex;align-items:center;gap:5px;font-size:17px;line-height:23px;font-weight:700}
 .cPost{border-radius:999px;padding:9px 17px;font-size:13.5px;font-weight:700;background:var(--dead);color:var(--deadink)}
 .cPost.on{background:var(--blue);color:#fff}
-.cBody{flex:1;overflow-y:auto;padding:8px 20px 20px;display:flex;flex-direction:column;gap:16px}
+.cBody{flex:1;overflow-y:auto;padding:8px 20px 28px;display:flex;flex-direction:column;gap:16px}
 .cBody::-webkit-scrollbar{width:0}
 .cBody>*{flex:0 0 auto}
 .cText{font-size:16px;line-height:23px;font-weight:400;color:var(--body);min-height:120px;
@@ -237,7 +242,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .kind.on.issue{background:var(--warn);border-color:var(--warn);color:#fff}
 .kind.on.event{background:var(--blue);border-color:var(--blue);color:#fff}
 .kind.off{opacity:.42}
-.chipdock{background:var(--paper);padding:12px 16px;display:flex;gap:8px;flex:0 0 auto}
+.chipdock{background:var(--paper);padding:12px 16px calc(14px + env(safe-area-inset-bottom));display:flex;gap:8px;flex:0 0 auto}
 .chip{flex:1 0 0;min-width:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-chip);
   height:59px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--mid)}
 .chip b{font-size:11px;line-height:16px;color:var(--faint)}
@@ -1068,6 +1073,9 @@ const I = (()=> {
     star:      s('<path d="M9 2.2L11.1 6.6L15.9 7.2L12.4 10.5L13.3 15.3L9 13L4.7 15.3L5.6 10.5L2.1 7.2L6.9 6.6L9 2.2Z" fill="currentColor"/>'),
     starO:     s('<path d="M9 2.6L11 6.7L15.4 7.3L12.2 10.4L13 14.8L9 12.7L5 14.8L5.8 10.4L2.6 7.3L7 6.7L9 2.6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>'),
     q:         s('<path d="M6.4 6.6C6.4 5.2 7.5 4.2 9 4.2C10.5 4.2 11.6 5.2 11.6 6.5C11.6 8.4 9 8.4 9 10.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="13.6" r="1.2" fill="currentColor"/>'),
+    tickO:     s('<circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M5.8 9.1L7.9 11.2L12.2 6.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'),
+    tickF:     s('<circle cx="9" cy="9" r="8" fill="currentColor"/><path d="M5.6 9.1L7.8 11.3L12.4 6.5" stroke="var(--knock,#fff)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>'),
+    triO:      s('<path d="M9 2.6L16.4 15.4H1.6L9 2.6Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 7.2V10.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9" cy="12.9" r="1" fill="currentColor"/>'),
     retry:     s('<path d="M15 9A6 6 0 1 1 12.9 4.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.6 1.8V5.2H12.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'),
   };
 })();
@@ -1217,7 +1225,7 @@ const S = {
   intent:null,                // saved write action across sign in
   draft:null,
   toast:null,
-  reads:0, wallSeen:false, auth_mode:'in', detecting:false, roadDraft:null, mapPin:null, tileFail:false, mapPick:null, pickRoad:null,
+  replying:false, reads:0, wallSeen:false, auth_mode:'in', detecting:false, roadDraft:null, mapPin:null, tileFail:false, mapPick:null, pickRoad:null,
   auth_err:'', auth_phone:'', auth_code:'', auth_name:'', auth_roads:['waterfield','waroda','chapel'],
   locTimer:null, focus:null,
 };
@@ -1576,20 +1584,33 @@ function gatherScreen(){
 function homeScreen(){
   const fresh = S.pins.filter(p=>days(p.created,S.now)<=2).length;
   const d = new Date(S.now);
+  const items = storyItems();
+  const card = (p,i,style) => `<button data-a="story:${i}" style="position:absolute;${style};background:var(--blueSoft);
+      border-radius:22px;padding:6px;box-shadow:0 6px 14px rgba(23,20,15,.10)">
+      ${p.photos&&p.photos.length
+        ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;display:block">`
+        : `<span style="width:100%;height:100%;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--blueInk)">${ic(MICO[p.kind]||'place',34)}</span>`}
+    </button>`;
+  const deck = items.length ? `<div style="position:relative;height:232px;margin-top:26px">
+      ${items[2]?card(items[2],2,'left:0;top:26px;width:118px;height:196px'):''}
+      ${items[1]?card(items[1],1,'left:66px;top:14px;width:128px;height:212px'):''}
+      ${card(items[0],0,'left:140px;top:0;width:206px;height:232px')}
+    </div>
+    <div style="display:flex;margin-top:22px">
+      <span style="flex:1"></span>
+      ${a('story:0','','<span style="width:56px;height:56px;border-radius:999px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center">'+ic('chevron',16)+'</span>')}
+    </div>` : '';
   return `<div class="header"><button data-a="roads" style="text-align:left">
       <div style="display:flex;gap:6px;align-items:center"><b class="subhead">${S.currentRoad?esc(road(S.currentRoad).label||road(S.currentRoad).name):'Home'}</b>${ic('chevdown',14)}</div>
-      <div class="meta">${S.currentRoad?esc(road(S.currentRoad).address.split(',').slice(0,2).join(',')):'Bandra West'}</div></button>
+      <div class="meta trunc" style="max-width:210px">${S.currentRoad?esc(road(S.currentRoad).address):'Bandra West'}</div></button>
     <div style="display:flex;gap:10px;align-items:center">${a('map','circbtn tapfx',ic('map',18))}
       ${S.auth==='out'?a('signin','pill','Sign in','style="background:#fff;border:1px solid var(--line);padding:11px 18px;font-size:14px"'):`<img class="avatar" style="width:38px;height:38px" src="${P.me.av}">`}</div></div>
-    <div class="scroll"><div class="feed" style="gap:20px">
-      <div><div class="meta">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]},</div>
-      <div class="h2" style="margin-top:6px">Welcome back</div>
-      <div class="h2"><span style="color:var(--blueInk)">${fresh} new</span> on your roads</div></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="subhead" style="flex:1">Today, in order</span>
-        ${a('story:0','pill','<span style="display:flex;gap:8px;align-items:center">'+ic('explore',15)+'Story</span>','style="background:var(--ink);color:#fff;padding:9px 16px;font-size:13px"')}</div>
-      ${S.pins.filter(p=>days(p.created,S.now)<=2).slice(0,3).map(p=>pinCard(p)).join('')}
-      <div class="endfeed">Everything else is on Explore</div>
+    <div class="scroll"><div style="padding:8px 20px 150px">
+      <div class="meta">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]},</div>
+      <div class="h2" style="margin-top:6px;font-size:31px;line-height:38px">Welcome back</div>
+      <div class="h2" style="font-size:31px;line-height:38px"><span style="color:var(--blue)">${fresh} new</span> updates</div>
+      ${deck}
+      <div class="endfeed" style="padding-top:26px">That is the last day on your four roads</div>
     </div></div>`;
 }
 function searchScreen(){
@@ -1684,12 +1705,8 @@ function pinScreen(id){
 
     if (voteOpen(p)) parts.push(`<div style="padding:12px 20px 0"><div class="card" style="border-color:var(--edge);padding:16px">
       <div class="subhead">Is it fixed now?</div><div style="height:12px"></div>
-      ${(()=>{const vr=voteRow(p,'row');return `<div class="cardfoot" style="gap:8px">
-        <span class="votes compact">${vr.votes}</span><span style="flex:1"></span>
-        <button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',17)}<span class="n">${p.supports}</span></button>
-        <button data-a="focuscomment" class="react">${ic('comment',17)}<span class="n">${replyCount(p)}</span></button></div>
-        <div class="rule" style="margin:13px 0"></div>${vr.line}
-        ${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}`;})()}</div></div>`);
+      ${(()=>{const vr=voteRow(p,'row');return `${vr.line}
+        ${vr.note?`<div class="small" style="margin-top:8px">${esc(vr.note)}</div>`:''}`;})()}</div></div>`);
     else if (st!=='filed') parts.push(`<div style="padding:12px 20px 0"><div class="notice flat">
       ${ic('lock',16,'color:var(--mute)')}<div>The road answers once the ward claims a fix, or after seven days of silence.
       ${days(p.created,S.now)<7?`Day ${days(p.created,S.now)+1} of seven.`:''}</div></div></div>`);
@@ -1724,13 +1741,8 @@ function pinScreen(id){
       :`<div class="body mute" style="padding-bottom:12px">Nothing said yet.</div>`}
     <div style="height:14px"></div></div></div>`);
 
-  return `<div class="scroll"><div style="padding-bottom:160px">${parts.join('')}</div></div>
-    <div class="dock"><div style="padding:0 20px 12px">
-      <div style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px;display:flex;gap:10px;align-items:center">
-        <input data-in="comment" id="commentbox" placeholder="Comment" value="${esc(S.commentDraft||'')}" style="padding:8px 0 8px 16px;font-size:14px">
-        ${ic('camera',21,'color:var(--ink)')}
-        <button data-a="postcomment:${p.id}" style="background:var(--ink);padding:13px;border-radius:999px;display:flex;opacity:${(S.commentDraft||'').trim()?1:.35}">
-          ${ic('send',18,'color:var(--paper)')}</button></div></div>
+  return `<div class="scroll"><div style="padding-bottom:190px">${parts.join('')}</div></div>
+    <div class="dock"><div style="padding:0 16px 12px">${actionStrip(p)}</div>
       <div class="bottombar" style="margin:0 auto">
         ${['home|home|Home','explore|explore|Explore','gather|gather|Gather','search|search|Search'].map(s=>{const [k,g,l]=s.split('|');
         return `<button data-a="tab:${k}" class="tab ${S.tab===k?'on':''}">${ic(g,20)}${S.tab===k?`<b>${l}</b>`:''}</button>`}).join('')}
@@ -1739,7 +1751,7 @@ function pinScreen(id){
 
 /* ── composer ────────────────────────────────────────────────────────── */
 function newDraft(roadId){ return {road:roadId, text:'', photos:[], date:null, price:null, poll:null,
-  issue:false, event:false, named:false, type:null, landmark:'', kbd:true}; }
+  issue:false, event:false, named:false, type:null, landmark:''}; }
 function draftTitle(d){ return (d.text||'').split('\n')[0].trim(); }
 function draftValid(d){
   if (!draftTitle(d)) return [false,''];
@@ -1825,7 +1837,7 @@ function composerScreen(){
       ${chip('price','tag','Price', d.issue, !!d.price)}
       ${chip('poll','poll','Poll', d.issue, !!d.poll)}
     </div>
-    ${d.kbd?`<div class="keyboard">${kbd()}</div>`:''}`;
+    `;
 }
 function kbd(){
   let h='';
@@ -2035,7 +2047,7 @@ function tileURL(lat,lng,z){
 function locSnippet(p){
   const [lat,lng]=pinXY(p); const t=tileURL(lat,lng,16); const r=road(p.road);
   return `<div style="padding:16px 20px 0"><button data-a="pinmap:${p.id}" class="card" style="width:100%;overflow:hidden;display:block">
-    <div style="position:relative;height:132px;background:var(--line)">
+    <div style="position:relative;height:132px;background:var(--line);overflow:hidden">
       <img src="${t.url}" style="position:absolute;width:420px;height:420px;left:50%;top:50%;
         transform:translate(-50%,-50%) translate(${Math.round((0.5-t.fx)*420)}px,${Math.round((0.5-t.fy)*420)}px);max-width:none">
       <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);color:var(--blue)">${ic('place',34)}</span>
@@ -2046,9 +2058,37 @@ function locSnippet(p){
       ${ic('chevron',12,'color:var(--mute)')}</div></button></div>`;
 }
 
+
+/* ── the action strip, stuck to the bottom of a pin ──────────────────── */
+function actionStrip(p){
+  if (S.replying) return `<div class="actbar">
+    ${a('stopreply','circbtn tapfx',ic('back',17))}
+    <input data-in="comment" id="commentbox" placeholder="Reply" value="${esc(S.commentDraft||'')}"
+      style="flex:1;padding:8px 4px 8px 12px;font-size:14px">
+    <button data-a="postcomment:${p.id}" style="background:var(--ink);padding:12px;border-radius:999px;display:flex;
+      opacity:${(S.commentDraft||'').trim()?1:.35}">${ic('send',18,'color:var(--paper)')}</button></div>`;
+  const mine = myAnswer(p);
+  const {fixed,not} = split(p);
+  const stack = (act,glyph,label,n,on,tone) => `<button data-a="${act}" class="astack ${on?'on':''}">
+      <span style="color:${on?tone:'var(--mid)'}">${ic(glyph,22)}</span>
+      <b style="color:${on?tone:'var(--body)'}">${label}${n!=null?' '+n:''}</b></button>`;
+  const votes = (p.kind==='issue' && voteOpen(p))
+    ? stack('vote:'+p.id+':fixed',    mine&&mine.value==='fixed'   ?'tickF':'tickO','Fixed',    fixed, mine&&mine.value==='fixed',    'var(--greenInk)')
+    + stack('vote:'+p.id+':notfixed', mine&&mine.value==='notfixed'?'warning':'triO','Not fixed',not,   mine&&mine.value==='notfixed','var(--redInk)')
+    : '';
+  const back = p.kind==='event'
+    ? stack('interest:'+p.id,'up','Interested',p.interested,p.interestedByMe,'var(--blueInk)')
+    : stack('support:'+p.id,'up','Support',p.supports,p.supported,'var(--blueInk)');
+  return `<div class="actbar">${votes}<span style="flex:1"></span>${back}
+    ${stack('startreply','comment','Comment',replyCount(p),false,'var(--blueInk)')}</div>`;
+}
+
 /* ── the story ───────────────────────────────────────────────────────── */
 function storyItems(){
-  return S.pins.slice().sort((a,b)=>(b.wardLast||b.created)-(a.wardLast||a.created)).slice(0,8);
+  const l = S.pins.slice().sort((a,b)=>(b.wardLast||b.created)-(a.wardLast||a.created));
+  const i = l.findIndex(p=>p.kind==='issue');
+  if (i>0) l.unshift(l.splice(i,1)[0]);
+  return l.slice(0,8);
 }
 function storyHead(p){
   if (p.kind!=='issue') return p.title;
@@ -2536,7 +2576,7 @@ document.addEventListener('click', e=>{
 function act(cmd, p1, p2){
   switch(cmd){
     case 'tab': S.tab=p1; S.stack=[{n:'tabs'}]; S.sheets=[]; return render();
-    case 'open': S.sheets=[]; if(S.auth==='out') S.reads=(S.reads||0)+1; return push({n:'pin', id:p1});
+    case 'open': S.sheets=[]; S.replying=false; if(S.auth==='out') S.reads=(S.reads||0)+1; return push({n:'pin', id:p1});
     case 'back': {
       const wasPin = topR().n==='pin';
       pop();
@@ -2553,7 +2593,7 @@ function act(cmd, p1, p2){
     case 'vote': return answer(p1,p2);
     case 'support': return support(p1);
     case 'interest': return interested(p1);
-    case 'postcomment': return comment(p1, S.commentDraft||'');
+    case 'postcomment': comment(p1, S.commentDraft||''); S.replying=false; return render();
     case 'retry': S.sheets=[]; return retrySend(p1);
     case 'share': return toast('Link copied.');
     case 'wsw': { const p=pin(p1); if (!liveAnswers(p).length) return; return openSheet({n:'wsw', id:p1, tab: split(p).not>split(p).fixed?'notfixed':'fixed'}); }
@@ -2614,7 +2654,9 @@ function act(cmd, p1, p2){
       S.roadDraft=null; pop(); toast('Removed. What was said there stays.'); return; }
     case 'postingas': if(S.draft.issue) return; return openSheet({n:'named'});
     case 'setnamed': S.draft.named = p1==='1'; S.sheets.pop(); return render();
-    case 'focuscomment': { const el=document.getElementById('commentbox'); if(el){el.scrollIntoView({block:'center'});el.focus();} return; }
+    case 'startreply': if(!gate(()=>{S.replying=true;render();}, 'A reply on '+pin(topR().id).title)) return;
+      S.replying=true; render(); setTimeout(()=>{const el=document.getElementById('commentbox'); if(el) el.focus();},40); return;
+    case 'stopreply': S.replying=false; return render();
     case 'setnow': { const r=road(p1); S.currentRoad=p1; r.lastOpened=S.now; render(); return toast('Now on '+r.name+'.'); }
     case 'detect': {
       if (S.detecting) return;
