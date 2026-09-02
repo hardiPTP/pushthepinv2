@@ -47,6 +47,19 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .mrk.sel{box-shadow:0 0 0 4px rgba(0,71,171,.35), 0 3px 8px rgba(23,20,15,.3)}
 .actbar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 8px;display:flex;align-items:center;gap:2px;
   box-shadow:0 6px 20px rgba(17,24,39,.07)}
+
+.vdrop{display:flex;align-items:center;gap:7px;flex:0 0 auto;background:#fff;border:1.5px solid var(--edge);
+  border-radius:999px;padding:7px 11px 7px 13px;font-size:13px;line-height:18px;font-weight:700;color:var(--body)}
+.vdrop.yes{border-color:var(--green);color:var(--greenInk)}
+.vdrop.no{border-color:var(--red);color:var(--redInk)}
+.vrow{display:flex;align-items:center;gap:11px;width:100%}
+.vrow .lab{font-size:13px;line-height:18px;font-weight:600;letter-spacing:-.2px}
+.vrow .said{display:flex;align-items:center;gap:5px;font-size:12px;line-height:17px;color:var(--body)}
+.vrow .said b{color:var(--ink);font-weight:700}
+.react{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700}
+.react{color:var(--body)}
+.react.on{background:var(--ink);color:#fff}
+.react .n{color:var(--mid);font-weight:700} .react.on .n{color:#D9D4CB}
 .actrow{display:flex;gap:8px;width:100%;align-items:center}
 .abtn{flex:1 0 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;
   background:#fff;border:1.5px solid var(--edge);border-radius:14px;padding:11px 12px;
@@ -1339,7 +1352,7 @@ function statusLine(p){
     case 'acknowledged':return ['Acknowledged', 'since '+fmtDay(p.ward.ack)];
     case 'inprogress':  return ['In progress', fmtDay(p.ward.prog)];
     case 'markeddone':  return ['Marked done', fmtDay(p.ward.done)];
-    case 'done':        return ['Done', 'the road agreed'];
+    case 'done':        return ['Done', fmtDay(verdictAt(p))];
     case 'notdone':     return ['Not done', 'sent again '+fmtDay(verdictAt(p))];
   }
 }
@@ -1358,6 +1371,14 @@ function runIntent(){
 }
 
 /* ── actions ─────────────────────────────────────────────────────────── */
+function cycleAnswer(pinId){
+  const p = pin(pinId);
+  const mine = myAnswer(p);
+  const next = !mine ? 'fixed' : (mine.value==='fixed' ? 'notfixed' : null);
+  if (next===null){ if(!gate(()=>cycleAnswer(pinId), 'An answer on '+p.title)) return;
+    S.answers.splice(S.answers.indexOf(mine),1); render(); return; }
+  answer(pinId, next);
+}
 function answer(pinId, value){
   const p = pin(pinId);
   if (!gate(()=>{ push({n:'pin',id:pinId}); answer(pinId,value); }, (value==='fixed'?'Fixed':'Not fixed')+' on '+p.title)) return;
@@ -1544,24 +1565,8 @@ function pinCard(p, opts={}){
   }
 
   const open = p.kind==='issue' && voteOpen(p);
-  const vr = open ? voteRow(p,'row') : null;
-  const ma = myAnswer(p);
-  const {fixed,not} = split(p);
-  if (open){
-    const vb = (val,label,n,glyph,tone) => { const on = ma && ma.value===val;
-      return `<button data-a="vote:${p.id}:${val}" class="abtn ${val==='fixed'?'fx':'nfx'} ${on?'on':''}">
-        <span style="color:${on?'#fff':tone}">${ic(glyph,17)}</span>${label} <span class="n">${n}</span></button>`; };
-    parts.push(`<div class="actrow" style="margin-top:13px">
-      ${vb('fixed','Fixed',fixed,'tick','var(--green)')}${vb('notfixed','Not fixed',not,'cross','var(--red)')}</div>`);
-    parts.push(`<div style="margin-top:11px">${vr.line}
-      ${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}</div>`);
-  }
-  const back = p.kind==='event'
-    ? `<button data-a="interest:${p.id}" class="abtn small ${p.interestedByMe?'on':''}">${ic('up',17)}Interested <span class="n">${p.interested}</span></button>`
-    : `<button data-a="support:${p.id}" class="abtn small ${p.supported?'on':''}">${ic('up',17)}Support <span class="n">${p.supports}</span></button>`;
-  parts.push(`<div class="actrow" style="margin-top:${open?'13px':'12px'}">
-    ${back}<span style="flex:1"></span>
-    <button data-a="open:${p.id}" class="abtn small plain">${ic('comment',17)}Comment <span class="n">${replyCount(p)}</span></button></div>`);
+  if (open) parts.push(`<div style="margin-top:13px">${voteRowNew(p)}</div>`);
+  parts.push(`<div style="margin-top:${open?'11px':'12px'}">${reactionRow(p)}</div>`);
   return `<div class="pincard" data-a="open:${p.id}">${parts.join('')}</div>`;
 }
 function pollBlock(p, inCard){
@@ -1599,7 +1604,7 @@ function feedScreen(){
     </div></div>`;
   const title = S.auth==='out'
     ? `<div class="stack" style="gap:4px"><div class="h1">Your streets</div>
-       <div class="body mid">Anyone can read. You need a number to put anything up.</div></div>`
+       <div class="body mid">Reading as a guest</div></div>`
     : `<div class="stack" style="gap:4px"><div class="h1">Your streets</div>
        <div class="body mid">Nearby, about twenty minutes on foot</div></div>`;
   const scopes = `<div class="scopes">
@@ -1761,33 +1766,21 @@ function pinScreen(id){
       ${railDetail(p)}
       <div class="rule" style="margin:14px 0 11px"></div>
       <div class="small" style="line-height:16px;font-size:11.5px">${p.grievance
-        ? `Sourced from MCGM, ward H West, grievance ${p.grievance}. Push the pin mirrors this record and does not edit it.`
-        : `Not filed with the ward yet. Nothing has been sent, so there is no number to check.`}</div>
+        ? `MCGM, ward H West, grievance ${p.grievance}`
+        : `Not filed with the ward yet`}</div>
       ${st==='filed'?`<div class="notice warn" style="margin-top:12px">${ic('warning',16,'color:var(--warn)')}
-        <div><b>${p.failReason==='ward'?'H West ward, MCGM did not answer.':'You were offline when you posted this.'}</b><br>
-        It is here and nothing has been filed.</div>
+        <div><b>${p.failReason==='ward'?'The ward did not answer':'No signal when you posted this'}</b></div>
         <button data-a="retry:${p.id}" class="noticeAct">Send it now</button></div>`:''}
     </div></div>`);
 
     if (voteOpen(p)) parts.push(`<div style="padding:12px 20px 0"><div class="card" style="border-color:var(--edge);padding:16px">
-      <div class="subhead">Is it fixed now?</div><div style="height:12px"></div>
-      ${(()=>{const vr=voteRow(p,'row');return `${vr.line}
-        ${vr.note?`<div class="small" style="margin-top:8px">${esc(vr.note)}</div>`:''}`;})()}</div></div>`);
-    else if (st!=='filed') parts.push(`<div style="padding:12px 20px 0"><div class="notice flat">
-      ${ic('lock',16,'color:var(--mute)')}<div>The road answers once the ward claims a fix, or after seven days of silence.
-      ${days(p.created,S.now)<7?`Day ${days(p.created,S.now)+1} of seven.`:''}</div></div></div>`);
+      <div class="subhead">Is it fixed now?</div><div style="height:10px"></div>
+      ${saidLine(p)}</div></div>`);
+    else if (st!=='filed') { const left = 7-days(p.created,S.now);
+      parts.push(`<div style="padding:12px 20px 0"><div class="notice flat">
+      ${ic('lock',16,'color:var(--mute)')}<div>Voting opens in ${left} day${left===1?'':'s'}.</div></div></div>`); }
 
-    if (!voteOpen(p)) parts.push(`<div style="padding:14px 20px 0"><div style="display:flex;gap:10px;align-items:center">
-      <div class="byline" style="gap:5px"><b style="font-size:14px">${p.supports}</b><span style="font-size:14px">supported</span></div>
-      <span style="flex:1"></span>
-      <button data-a="support:${p.id}" class="pill" style="background:var(--blue);color:#fff;padding:10px 16px;font-size:14px">
-        ${ic('up',17)}${p.supported?'Supported':'Support this'}</button></div></div>`);
   }
-  if (p.kind==='event') parts.push(`<div style="padding:14px 20px 0"><div style="display:flex;gap:10px;align-items:center">
-      <div class="byline" style="gap:5px"><b style="font-size:14px">${p.interested}</b><span style="font-size:14px">interested</span></div>
-      <span style="flex:1"></span>
-      <button data-a="interest:${p.id}" class="pill" style="background:var(--blue);color:#fff;padding:10px 16px;font-size:14px">
-        ${p.interestedByMe?'Interested':'I am interested'}</button></div></div>`);
 
   parts.push(`<div style="padding:16px 20px 0;display:flex;gap:12px;align-items:center">
     <span style="width:38px;height:38px;border-radius:999px;background:var(--paper);border:1px solid var(--line);
@@ -1894,7 +1887,7 @@ function composerScreen(){
       ${blocks.join('')}
       ${!ok&&why?`<div class="reason">${ic('warning',14,'color:var(--redInk)')}${why}</div>`:''}
       ${d.issue?`<div class="wardpanel"><div class="t">${ic('bldg',16,'color:var(--warn)')}H West ward, MCGM</div>
-        <div class="b">Posting files a complaint and gives you a number you can check.</div></div>`:''}
+        </div>`:''}
       <div style="height:12px"></div>
     </div>
     <div class="kindrow">
@@ -1963,7 +1956,6 @@ function roadsScreen(){
           ${a('pinroad:'+r.id,'tapfx',ic('starO',20,'color:var(--mute)'))}
           ${a('roadcfg:'+r.id,'tapfx',ic('chevron',16,'color:var(--mute);margin-left:10px'))}</div>`).join('')}</div>
       ${a('addroad','btn-ghost',ic('plus',15)+' Add a road','style="margin-top:16px;border-style:dashed;border-color:var(--dash)"')}
-      <div class="small" style="margin-top:14px">Removing a road keeps everything already said there.</div>
     </div></div>`;
 }
 function addRoadScreen(){
@@ -2058,11 +2050,8 @@ function authScreen(which){
       ${['in|Sign in','up|Sign up'].map(x=>{const [k,l]=x.split('|');
         return `<button data-a="authmode:${k}" class="seg ${S.auth_mode===k?'on':''}">${l}</button>`}).join('')}</div>
     <div class="h2">What is your number?</div>
-    <div class="body mid" style="margin-top:10px">One number, one person, one set of roads. It never shows on a pin.</div>
     <div class="field" style="margin-top:20px"><span class="cc">+91</span>
       <input data-in="auth_phone" inputmode="numeric" placeholder="98670 41122" value="${esc(S.auth_phone)}"></div>
-    <div class="notice flat" style="margin-top:14px">${ic('lock',16,'color:var(--mute)')}
-      <div>We use it to check you are one person on these roads. Neighbours see your name, never the number.</div></div>
     ${S.auth_err?`<div class="reason" style="margin-top:12px">${ic('warning',14,'color:var(--redInk)')}${esc(S.auth_err)}</div>`:''}
     `, 'Send me a code', 'sendcode', S.auth_phone.replace(/\D/g,'').length<10);
   if (which==='code') return wrap(`
@@ -2088,7 +2077,6 @@ function authScreen(which){
           <span style="width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;
             ${picked.includes(r.id)?'background:var(--ink);color:#fff':'border:1.5px solid var(--line)'}">
             ${picked.includes(r.id)?ic('tick',14):''}</span></button>`).join('')}</div>
-      <div class="small" style="margin-top:14px">You can read any road in Bandra West. You can only confirm a fix on these.</div>
       `, picked.length?`${['One','Two','Three','Four'][picked.length-1]} road${picked.length>1?'s':''}, done`:'Pick at least one', 'saveroads', !picked.length);
   }
   if (which==='name') return wrap(`
@@ -2097,8 +2085,6 @@ function authScreen(which){
     <div style="display:flex;gap:14px;align-items:center;margin-top:20px">
       ${avatarEl(P.me,64)}
       <div class="field" style="flex:1"><input data-in="auth_name" placeholder="Dev D" value="${esc(S.auth_name)}"></div></div>
-    <div class="notice flat" style="margin-top:14px">${ic('person',16,'color:var(--mute)')}
-      <div>Your name sits under the road, never above it. The road is what people follow.</div></div>
     `, 'Start reading', 'finishauth', !S.auth_name.trim());
 }
 
@@ -2162,6 +2148,34 @@ function setPrimary(hex){
   const sw=document.getElementById('devSwatch'); if(sw) sw.style.background=hex;
 }
 
+
+/* ── the vote, one switch ────────────────────────────────────────────── */
+function voteDrop(p){
+  const ma = myAnswer(p);
+  const v = ma ? (ma.value==='fixed'?'yes':'no') : '';
+  const label = ma ? (ma.value==='fixed'?'Fixed':'Not fixed') : 'Answer';
+  return `<button data-a="votemenu:${p.id}" class="vdrop ${v}">
+    ${ma?ic(ma.value==='fixed'?'tick':'cross',14):''}<span>${label}</span>${ic('chevdown',13)}</button>`;
+}
+function saidLine(p){
+  const {fixed,not} = split(p), t = fixed+not;
+  if (!t) return `<span class="said mute">Nobody has said yet</span>`;
+  if (t<5) return `<button data-a="wsw:${p.id}" class="said"><b>${fixed}</b> yes <b>${not}</b> no ${ic('chevron',11,'color:var(--mute)')}</button>`;
+  const lead = not>fixed ? [not,'no'] : [fixed,'yes'];
+  return `<button data-a="wsw:${p.id}" class="said"><b>${lead[0]}</b> said <b>${lead[1]}</b> ${ic('chevron',11,'color:var(--mute)')}</button>`;
+}
+function voteRowNew(p){
+  return `<div class="vrow"><span class="lab">Is it fixed?</span>${voteDrop(p)}
+    <span style="flex:1"></span>${saidLine(p)}</div>`;
+}
+function reactionRow(p){
+  const back = p.kind==='event'
+    ? `<button data-a="interest:${p.id}" class="react ${p.interestedByMe?'on':''}">${ic('up',17)}<span class="n" style="color:inherit">${p.interested}</span></button>`
+    : `<button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',17)}<span class="n" style="color:inherit">${p.supports}</span></button>`;
+  return `<div class="actrow" style="justify-content:flex-end">${back}
+    <button data-a="open:${p.id}" class="react">${ic('comment',17)}<span class="n">${replyCount(p)}</span></button></div>`;
+}
+
 /* ── the action strip, stuck to the bottom of a pin ──────────────────── */
 function actionStrip(p){
   if (S.replying) return `<div class="actbar">
@@ -2170,19 +2184,14 @@ function actionStrip(p){
       style="flex:1;padding:8px 4px 8px 12px;font-size:14px">
     <button data-a="postcomment:${p.id}" style="background:var(--ink);padding:12px;border-radius:999px;display:flex;
       opacity:${(S.commentDraft||'').trim()?1:.35}">${ic('send',18,'color:var(--paper)')}</button></div>`;
-  const ma = myAnswer(p);
-  const {fixed,not} = split(p);
-  const vb = (val,label,n,glyph,tone) => { const on = ma && ma.value===val;
-    return `<button data-a="vote:${p.id}:${val}" class="abtn ${val==='fixed'?'fx':'nfx'} ${on?'on':''}">
-      <span style="color:${on?'#fff':tone}">${ic(glyph,17)}</span>${label} <span class="n">${n}</span></button>`; };
-  const votes = (p.kind==='issue' && voteOpen(p))
-    ? vb('fixed','Fixed',fixed,'tick','var(--green)') + vb('notfixed','Not fixed',not,'cross','var(--red)') + '<span class="actsep"></span>'
-    : '';
+  const open = p.kind==='issue' && voteOpen(p);
   const back = p.kind==='event'
-    ? `<button data-a="interest:${p.id}" class="abtn small plain ${p.interestedByMe?'on':''}">${ic('up',18)}<span class="n">${p.interested}</span></button>`
-    : `<button data-a="support:${p.id}" class="abtn small plain ${p.supported?'on':''}">${ic('up',18)}<span class="n">${p.supports}</span></button>`;
-  return `<div class="actbar">${votes}${votes?'':'<span style="flex:1"></span>'}${back}
-    <button data-a="startreply" class="abtn small plain">${ic('comment',18)}<span class="n">${replyCount(p)}</span></button></div>`;
+    ? `<button data-a="interest:${p.id}" class="react ${p.interestedByMe?'on':''}">${ic('up',18)}<span class="n" style="color:inherit">${p.interested}</span></button>`
+    : `<button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',18)}<span class="n" style="color:inherit">${p.supports}</span></button>`;
+  return `<div class="actbar">
+    ${open?`<span style="font-size:13px;font-weight:600;letter-spacing:-.2px;margin-left:6px">Is it fixed?</span>${voteDrop(p)}`:''}
+    <span style="flex:1"></span>${back}
+    <button data-a="startreply" class="react">${ic('comment',18)}<span class="n">${replyCount(p)}</span></button></div>`;
 }
 /* ── the story ───────────────────────────────────────────────────────── */
 function storyItems(){
@@ -2239,7 +2248,7 @@ function storyScreen(){
         <span class="bodyStrong" style="font-size:15px;margin-left:6px">${p.supports||0}</span>
         <span class="body mid">supported</span>
         <span style="flex:1"></span>
-        ${a('open:'+p.id,'pill','Open','style="background:var(--blueSoft);color:var(--blueInk);padding:9px 16px;font-size:13px"')}</div>
+        </div>
       <div class="rule" style="margin:14px 0"></div>
       <div style="display:flex;align-items:center;gap:14px">
         ${a('storystep:-1','','<span style="width:44px;height:44px;border-radius:14px;background:var(--blueSoft);color:var(--blueInk);display:flex;align-items:center;justify-content:center">'+ic('back',18)+'</span>')}
@@ -2373,7 +2382,6 @@ function sheetView(s){
     case 'auth': return `<div class="grab"></div>${sheetHead('Sign in to do that','Reading is open. Putting anything up is not.')}
       <div class="sheetBody"><div class="stack" style="gap:10px;padding-bottom:8px">
         ${a('go:number','btn-dark','Continue with a number')}
-        <div class="small">One number, one person, one set of roads. It never shows on a pin.</div>
       </div></div>`;
     case 'wsw':   return wswSheet(s);
     case 'person':return personSheet(s);
@@ -2392,6 +2400,19 @@ function sheetView(s){
           <div class="metaQ">Your name is kept off the pin</div></div>
           ${!S.draft.named?ic('tick',16,'color:var(--blueInk)'):''}</button>
       </div><div style="height:12px"></div></div>`;
+    case 'vote': { const p=pin(s.id), mine=myAnswer(p);
+      const row = (val,glyph,label,tone) => `<button data-a="setanswer:${p.id}:${val}" class="row">
+        <span style="color:${tone}">${ic(glyph,18)}</span>
+        <div class="c"><div class="bodyStrong" style="font-size:15px">${label}</div></div>
+        ${mine&&mine.value===val?ic('tick',16,'color:var(--ink)'):''}</button>`;
+      return `<div class="grab"></div>${sheetHead('Is it fixed?','Only you can change your own answer.')}
+        <div class="sheetBody"><div class="rows">
+          ${row('fixed','tick','Fixed','var(--green)')}
+          ${row('notfixed','cross','Not fixed','var(--red)')}
+          ${mine?`<button data-a="setanswer:${p.id}:clear" class="row">
+            <span style="color:var(--mute)">${ic('close',18)}</span>
+            <div class="c"><div class="bodyStrong" style="font-size:15px;color:var(--mid)">Take it back</div></div></button>`:''}
+        </div><div style="height:12px"></div></div>`; }
     case 'roadpick': return roadPickSheet(s);
     case 'swap':  return swapSheet(s);
     case 'discard': return `<div class="grab"></div>${sheetHead('Leave this pin?','')}
@@ -2693,6 +2714,14 @@ function act(cmd, p1, p2){
     case 'sheetback': return closeSheet();
     case 'toastact': { const f=S.toast.action.fn; S.toast=null; return f(); }
     case 'vote': return answer(p1,p2);
+    case 'votemenu': { const p=pin(p1);
+      if (!gate(()=>act('votemenu',p1), 'An answer on '+p.title)) return;
+      return openSheet({n:'vote', id:p1}); }
+    case 'setanswer': { const p=pin(p1); const mine=myAnswer(p);
+      S.sheets.pop();
+      if (p2==='clear'){ if(mine) S.answers.splice(S.answers.indexOf(mine),1); return render(); }
+      if (mine && mine.value===p2) return render();
+      return answer(p1,p2); }
     case 'support': return support(p1);
     case 'interest': return interested(p1);
     case 'postcomment': comment(p1, S.commentDraft||''); S.replying=false; return render();
