@@ -62,6 +62,15 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .react .n{color:var(--mid);font-weight:700} .react.on .n{color:#D9D4CB}
 .homewash{position:absolute;left:0;right:0;top:0;height:62%;pointer-events:none;z-index:0;
   background:linear-gradient(180deg, var(--blueSoft) 0%, var(--blueSoft) 12%, rgba(0,0,0,0) 100%)}
+
+.pcar{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:14px 20px 0}
+.pcar::-webkit-scrollbar{display:none}
+.pcar .slide{position:relative;flex:0 0 84%;aspect-ratio:16/10;overflow:hidden;border-radius:14px;scroll-snap-align:center;padding:0}
+.pcar .slide img{width:100%;height:100%;object-fit:cover;display:block}
+.pcar .cnt{position:absolute;top:8px;right:8px;background:rgba(23,19,15,.7);color:#fff;font-size:11px;line-height:16px;padding:2px 8px;border-radius:999px}
+.pcar .by{position:absolute;left:8px;bottom:8px;background:rgba(23,19,15,.7);color:#fff;font-size:11px;line-height:16px;padding:2px 8px;border-radius:999px}
+.verifiedchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--greenInk);
+  background:rgba(46,125,79,.10);padding:3px 9px;border-radius:999px;white-space:nowrap}
 .actrow{display:flex;gap:8px;width:100%;align-items:center}
 .abtn{flex:1 0 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;
   background:#fff;border:1.5px solid var(--edge);border-radius:14px;padding:11px 12px;
@@ -1235,7 +1244,7 @@ function seedPins(){ return [
   { id:'jazz', kind:'event', road:'chapel', spot:'Pali Hill', author:'bonobo', anon:false,
     created:D(Y,8,31,11), title:'Live jazz on the roof',
     text:'Rooftop set by the Rhodes Trio. No cover before nine.',
-    photos:[IMG.food], date:D(Y,9,1,21), interested:88, interestedByMe:false,
+    place:'bonobo', photos:[IMG.food], date:D(Y,9,1,21), interested:88, interestedByMe:false,
     supports:0, supported:false, replyBase:23 },
 
   { id:'almirah', kind:'plain', road:'waterfield', spot:'Ranwar, pole no. 14', author:'sunita', anon:false,
@@ -1681,6 +1690,7 @@ function searchScreen(){
   const here = S.currentRoad;
   const mine = S.roads.filter(r=>r.pinned).map(r=>r.id);
   const roadHits = q ? S.roads.filter(r=>r.name.toLowerCase().includes(q)) : [];
+  const placeHits = q ? PLACES.filter(pl=>(pl.name+' '+pl.kind+' '+pl.note).toLowerCase().includes(q)) : [];
   const hits = q ? S.pins.filter(p=>(p.title+' '+p.text).toLowerCase().includes(q)) : [];
   const onHere = hits.filter(p=>p.road===here);
   const onMine = hits.filter(p=>p.road!==here && mine.includes(p.road));
@@ -1707,6 +1717,12 @@ function searchScreen(){
         <span style="width:34px;height:34px;border-radius:12px;background:var(--blueSoft);color:var(--blueInk);display:flex;align-items:center;justify-content:center;flex:0 0 auto">${ic('q',16)}</span>
         <span class="bodyStrong" style="flex:1;font-size:15px">Ask the road about ${esc(S.q)}</span>
         ${ic('chevron',12,'color:var(--mute)')}</button>`:''}
+      ${placeHits.length?head('Places',placeHits.length)+`<div class="rows">${placeHits.map(pl=>`
+        <button data-a="place:${pl.id}" class="row" style="width:100%">
+          <img src="${pl.photo}" style="width:34px;height:34px;border-radius:12px;object-fit:cover;flex:0 0 auto">
+          <span class="c"><span class="bodyStrong" style="display:block;font-size:15px">${esc(pl.name)}</span>
+          <span class="metaQ">${esc(road(pl.road).name)}, ${pl.hours.toLowerCase()}</span></span>
+          <span class="metaQ" style="display:flex;gap:5px;align-items:center">${ic('walk',12)}${pl.walk}</span></button>`).join('')}</div>`:''}
       ${roadHits.length?head('Roads',roadHits.length)+`<div class="rows">${roadHits.map(r=>`
         <div class="row"><div class="c"><div class="bodyStrong">${esc(r.name)}</div>
           <div class="metaQ trunc">${esc(r.address)}</div></div>
@@ -1716,7 +1732,7 @@ function searchScreen(){
           :`<div class="notice flat">${ic('search',16,'color:var(--mute)')}<div><b>Nothing on ${esc(road(here).name)}</b><br>The matches below are on other roads.</div></div>`):''}
       ${onMine.length?head('Your other roads', onMine.length)+group(onMine,true,true):''}
       ${beyond.length?head('Beyond your roads', beyond.length,'Bandra West')+group(beyond,true,true):''}
-      ${q&&!roadHits.length&&!hits.length?`<div class="card" style="padding:18px;margin-top:14px">
+      ${q&&!roadHits.length&&!hits.length&&!placeHits.length?`<div class="card" style="padding:18px;margin-top:14px">
         <div class="bodyStrong">Nothing by that name</div>
         <div class="body mid" style="margin-top:6px">Nobody has put up anything for “${esc(S.q)}” yet.</div></div>`:''}
     </div></div>`;
@@ -1753,7 +1769,7 @@ function pinScreen(id){
     ${avatarEl(au,32)}<div><div class="bodyStrong" style="font-size:13px">${esc(au.name)}</div>
     <div class="small">${(()=>{const ma=S.answers.find(x=>x.pinId===p.id&&x.userId===p.author);
       return ma?`said ${ma.value==='fixed'?'fixed':'not fixed'} on ${fmtShort(ma.at)}`:'put it up '+fmtShort(p.created);})()}</div></div></div></div>`);
-  if (p.photos&&p.photos.length) parts.push(`<div style="padding:14px 20px 0"><img class="photo" style="height:190px;border-radius:14px" src="${p.photos[0]}"></div>`);
+  parts.push(carouselHTML(p));
   if (p.price) parts.push(`<div style="padding:14px 20px 0" class="price">₹${p.price.value.toLocaleString('en-IN')}
     ${p.price.note?`<span class="pricenote"> ${esc(p.price.note)}</span>`:''}</div>`);
   if (p.kind==='event'&&p.date) parts.push(`<div style="padding:14px 20px 0"><div class="dateline">${ic('calendar',16,'color:var(--blue)')}${esc(eventLabel(p))}</div></div>`);
@@ -1785,6 +1801,12 @@ function pinScreen(id){
       color:var(--mid);display:flex;align-items:center;justify-content:center;flex:0 0 auto">${ic('place',17)}</span>
     <span style="flex:1;min-width:0"><span class="bodyStrong" style="display:block;font-size:15px">${esc(r.name)}${p.spot?', '+esc(p.spot):''}</span>
     <span class="meta">${p.anon?'Pinned by a neighbour':'Pinned by '+esc(person(p.author).name)}, ${fmtDay(p.created)}</span></span></div>`);
+  if (p.place){ const pl=place(p.place);
+    parts.push(`<div style="padding:16px 20px 0"><button data-a="place:${pl.id}" class="row" style="width:100%;background:#fff;border:1px solid var(--line);border-radius:var(--r-card)">
+      <img src="${pl.photo}" style="width:38px;height:38px;border-radius:12px;object-fit:cover;flex:0 0 auto">
+      <span class="c"><span class="bodyStrong" style="display:block;font-size:15px">${esc(pl.name)}</span>
+      <span class="metaQ">${pl.kind}, ${esc(road(pl.road).name)}</span></span>
+      ${ic('chevron',12,'color:var(--mute)')}</button></div>`); }
   parts.push(locSnippet(p));
   parts.push(`<div style="padding:16px 20px 0"><div class="card" style="border-color:var(--edge);padding:16px 16px 6px">
     <div style="display:flex;gap:8px;align-items:baseline"><span class="subhead">Replies</span>
@@ -2150,6 +2172,22 @@ function setPrimary(hex){
 }
 
 
+
+function allPhotos(p){
+  const out=(p.photos||[]).map(x=>({src:x,by:null}));
+  S.comments.filter(c=>c.pinId===p.id && c.photo).forEach(c=>out.push({src:c.photo,by:person(c.userId).name}));
+  return out;
+}
+function carouselHTML(p){
+  const l=allPhotos(p);
+  if(!l.length) return '';
+  if(l.length===1) return `<div style="padding:14px 20px 0"><button data-a="viewphoto:${l[0].src}" style="display:block;width:100%">
+    <img class="photo" style="height:190px;border-radius:14px" src="${l[0].src}"></button></div>`;
+  return `<div class="pcar">${l.map((x,i)=>`<button data-a="viewphoto:${x.src}" class="slide">
+    <img src="${x.src}"><span class="cnt">${i+1} of ${l.length}</span>
+    ${x.by?`<span class="by">${esc(x.by)}</span>`:''}</button>`).join('')}</div>`;
+}
+
 /* ── the vote, one switch ────────────────────────────────────────────── */
 function voteDrop(p){
   const ma = myAnswer(p);
@@ -2200,6 +2238,41 @@ function actionStrip(p){
     <span style="flex:1"></span>${back}
     <button data-a="startreply" class="react">${ic('comment',18)}<span class="n">${replyCount(p)}</span></button></div>`;
 }
+
+function placeScreen(id){
+  const pl=place(id); if(!pl) return '';
+  const on=placePins(id).filter(p=>p.kind==='event');
+  const other=placePins(id).filter(p=>p.kind!=='event');
+  const rowFor = p => `<button data-a="open:${p.id}" class="row" style="width:100%">
+      <span style="width:34px;height:34px;border-radius:12px;background:var(--blueSoft);color:var(--blueInk);
+        display:flex;align-items:center;justify-content:center;flex:0 0 auto">${ic(MICO[p.kind]||'place',16)}</span>
+      <span class="c"><span class="bodyStrong" style="display:block;font-size:15px">${esc(p.title)}</span>
+      <span class="metaQ">${p.kind==='event'?eventLabel(p):ago(p.created)}</span></span>
+      ${ic('chevron',12,'color:var(--mute)')}</button>`;
+  return `<div style="padding:0 20px;display:flex">${a('back','circbtn tapfx',ic('back',18))}</div>
+    <div class="scroll"><div style="padding:12px 20px 150px">
+      <div class="metaQ">${pl.kind}</div>
+      <div class="h1" style="margin-top:2px">${esc(pl.name)}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <span class="body mid">${esc(road(pl.road).name)}, ${esc(pl.spot)}</span>
+        ${pl.verified?`<span class="verifiedchip">${ic('tick',12)}Verified by place</span>`:''}</div>
+      <img class="photo" style="height:190px;border-radius:14px;margin-top:16px" src="${pl.photo}">
+      <div class="card" style="padding:16px;margin-top:14px">
+        <div class="body">${esc(pl.note)}</div>
+        <div class="rule" style="margin:12px 0"></div>
+        <div style="display:flex;align-items:center;gap:10px">${ic('clock',17,'color:var(--mute)')}
+          <span class="bodyStrong" style="flex:1;font-size:15px">${pl.hours}</span>
+          <span class="metaQ" style="display:flex;gap:5px;align-items:center">${ic('walk',13)}${pl.walk}</span></div></div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:22px 0 10px">
+        <span class="subhead">What is on</span><span style="flex:1"></span><span class="metaQ">${on.length}</span></div>
+      ${on.length?`<div class="rows">${on.map(rowFor).join('')}</div>`
+        :`<div class="notice flat">${ic('calendar',16,'color:var(--mute)')}<div>Nothing on right now.</div></div>`}
+      ${other.length?`<div style="display:flex;align-items:baseline;gap:8px;margin:22px 0 10px">
+        <span class="subhead">Also from here</span><span style="flex:1"></span><span class="metaQ">${other.length}</span></div>
+        <div class="rows">${other.map(rowFor).join('')}</div>`:''}
+    </div></div>${bottomBar()}`;
+}
+
 /* ── the story ───────────────────────────────────────────────────────── */
 function storyItems(){
   const l = S.pins.slice().sort((a,b)=>(b.wardLast||b.created)-(a.wardLast||a.created));
@@ -2574,6 +2647,19 @@ function pollSheet(){
         ?`<div class="reason" style="margin-top:10px">${ic('warning',14,'color:var(--redInk)')}A question and two answers, none of them blank.</div>`:''}
     </div>`;
 }
+
+const PLACES=[
+ {id:'bonobo',name:'Bonobo',kind:'Eat and drink',road:'chapel',spot:'Pali Hill',photo:IMG.food,
+  hours:'Open till 1 am',note:'Rooftop bar. Live sets most Wednesdays.',verified:true,walk:'6 min'},
+ {id:'saltwater',name:'Saltwater',kind:'Eat and drink',road:'chapel',spot:'near the bakery',photo:IMG.food,
+  hours:'Open till 11 pm',note:'Small kitchen, mostly pasta and bread.',verified:true,walk:'4 min'},
+ {id:'ganesh',name:'Ganesh Carpentry Works',kind:'Service',road:'chapel',spot:'opposite the parish hall',photo:IMG.carpenter,
+  hours:'Open till 8 pm',note:'Doors, frames and furniture repair. Works Sundays till one.',verified:false,walk:'4 min'},
+ {id:'parish',name:'St Peter parish hall',kind:'Classes and halls',road:'waroda',spot:'parish gate',photo:IMG.pothole,
+  hours:'Open till 9 pm',note:'Choir practice, classes and the Sunday market.',verified:true,walk:'8 min'}
+];
+function place(id){return PLACES.find(x=>x.id===id);}
+function placePins(id){return S.pins.filter(p=>p.place===id);}
 const LIB = [IMG.pothole, IMG.food, IMG.carpenter];
 function photoSheet(){
   const d = S.draft;
@@ -2653,6 +2739,7 @@ function view(){
   else if (t.n==='wall')     body = wallScreen();
   else if (t.n==='roadcfg')  body = roadCfgScreen(t.id);
   else if (t.n==='map')      body = mapScreen();
+  else if (t.n==='place')    body = placeScreen(t.id);
   else if (t.n==='story')    return statusBar()+storyScreen()+(S.toast?toastView():'');
   else body = '';
   return statusBar()+body+sheetLayer()+(S.toast?toastView():'');
@@ -2768,6 +2855,7 @@ function act(cmd, p1, p2){
     /* auth */
     case 'go': S.sheets=[]; if(topR().n==='wall') S.stack.pop(); return push({n:'auth', which:p1});
     case 'wallno': S.intent=null; return pop();
+    case 'place': S.sheets=[]; return push({n:'place', id:p1});
     case 'map': S.mapPick=null; return push({n:'map'});
     case 'mappick': S.mapPick=p1||'now'; S.mapPin=null; S.sheets=[]; S.pickRoad=(S.mapPick==='draft'&&S.draft?S.draft.road:S.currentRoad);
       if (topR().n!=='map') push({n:'map'}); else render();
