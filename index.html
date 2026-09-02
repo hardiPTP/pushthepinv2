@@ -51,7 +51,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .mrk.sel{box-shadow:0 0 0 4px rgba(0,71,171,.35), 0 3px 8px rgba(23,20,15,.3)}
 .actbar{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 8px;display:flex;align-items:center;gap:2px;
   filter:drop-shadow(0 6px 5px rgba(23,20,15,.07))}
-.astack{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 11px;border-radius:16px}
+.astack{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:16px;min-width:0}
 .astack b{font-size:11px;line-height:14px;letter-spacing:-.1px;white-space:nowrap}
 .astack.on{background:var(--blueSoft)}
 .mapcard{position:absolute;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:22;
@@ -172,7 +172,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .votes{display:flex;gap:8px;width:100%}
 .votes.compact{width:auto;flex:0 0 auto}
 .votes.compact .vote{flex:0 0 auto;padding:8px 13px 8px 11px;font-size:12.5px;gap:6px}
-.cardfoot{flex-wrap:nowrap}
+.cardfoot{flex-wrap:nowrap;overflow:hidden}
 .vote{flex:1 0 0;min-width:0;background:#fff;border:1.5px solid var(--blueEdge);border-radius:999px;
   padding:9.5px 16px 9.5px 14px;display:flex;align-items:center;justify-content:center;gap:7px;
   font-size:13px;line-height:18px;font-weight:700;color:var(--body)}
@@ -1508,15 +1508,24 @@ function pinCard(p, opts={}){
     parts.push(`<div class="rule" style="margin-top:14px"></div>`);
   }
 
+  const open = p.kind==='issue' && voteOpen(p);
+  const vr = open ? voteRow(p,'row') : null;
+  const ma = myAnswer(p);
+  const {fixed,not} = split(p);
+  const stack = (act,glyph,label,n,on,tone) => `<button data-a="${act}" class="astack ${on?'on':''}">
+      <span style="color:${on?tone:'var(--mid)'}">${ic(glyph,21)}</span>
+      <b style="color:${on?tone:'var(--body)'}">${label}${n!=null?' '+n:''}</b></button>`;
   const foot = [];
-  const vr = (p.kind==='issue' && voteOpen(p)) ? voteRow(p,'row') : null;
-  if (vr) foot.push(`<span class="votes compact">${vr.votes}</span><span style="flex:1"></span>`);
-  if (p.kind==='issue') foot.push(`<button data-a="support:${p.id}" class="react ${p.supported?'on':''}">${ic('up',17)}${vr?'':'Support '}<span class="n">${p.supports}</span></button>`);
-  if (p.kind==='event') foot.push(`<button data-a="interest:${p.id}" class="react ${p.interestedByMe?'on':''}">${p.interested} interested</button>`);
-  foot.push(`<button data-a="open:${p.id}" class="react">${ic('comment',17)}${vr?'':'Comment '}<span class="n">${replyCount(p)}</span></button>`);
-  parts.push(`<div class="cardfoot" style="margin-top:13px">${foot.join('')}</div>`);
+  if (open) foot.push(
+    stack('vote:'+p.id+':fixed',    ma&&ma.value==='fixed'   ?'tickF':'tickO','Fixed',    fixed, ma&&ma.value==='fixed',    'var(--greenInk)'),
+    stack('vote:'+p.id+':notfixed', ma&&ma.value==='notfixed'?'warning':'triO','Not fixed',not,   ma&&ma.value==='notfixed','var(--redInk)'));
+  foot.push('<span style="flex:1"></span>');
+  if (p.kind==='event') foot.push(stack('interest:'+p.id,'up','Interested',p.interested,p.interestedByMe,'var(--blueInk)'));
+  else foot.push(stack('support:'+p.id,'up','Support',p.supports,p.supported,'var(--blueInk)'));
+  foot.push(stack('open:'+p.id,'comment','Comment',replyCount(p),false,'var(--blueInk)'));
+  parts.push(`<div class="cardfoot" style="margin-top:11px;margin-left:-4px;margin-right:-4px">${foot.join('')}</div>`);
   if (vr){
-    parts.push(`<div class="rule" style="margin-top:13px"></div>`);
+    parts.push(`<div class="rule" style="margin-top:11px"></div>`);
     parts.push(`<div style="margin-top:12px">${vr.line}${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}</div>`);
   }
 
