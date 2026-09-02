@@ -9,17 +9,13 @@
 :root{
   --paper:#FBFAF7; --card:#FFFFFF;
   --ink:#17130F; --body:#3A342C; --mid:#6E6E6E; --mute:#9E9A94; --faint:#B0AAA0;
-  --line:#E9E5DE; --edge:#C7B99F; --dash:#B5B0A8; --dead:#EDE9E1; --deadink:#A29C92;
+  --line:#E9E5DE; --edge:#D8D1C4; --dash:#B5B0A8; --dead:#EDE9E1; --deadink:#A29C92;
   --green:#2E7D4F; --greenInk:#256B42;
   --red:#C42B1C; --redInk:#B02618;
-  /* Cobalt is the accent. It is dark where the old accent was light, so anything
-     sitting on a cobalt fill is white, and anything cobalt sitting on paper is
-     --blueInk. Measured: white on --blue 8.44:1, --blueInk on paper 12.21:1. */
-  --blue:#0047AB; --blueDeep:#003A8C; --blueInk:#00306E;
-  --blueSoft:#E4ECFB; --blueEdge:#BCD2F0; --blueLift:#A9C6FF;
+  /* ink is the primary. the control panel can dial a hue in over the top of it. */
+  --blue:#17130F; --blueDeep:#000000; --blueInk:#17130F;
+  --blueSoft:#F1EDE5; --blueEdge:#DDD6CA; --blueLift:#B9B2A7;
   --onBlueGreen:#86E2AE; --onBlueRed:#FFA396;
-  /* --ward is no longer the brand hue, so it now means one thing only: the ward
-     is working on it. --warn stays the issue orange. */
   --ward:#B87A0A; --warn:#E07B00; --warnBg:#FBEAD8;
   --r-card:20px; --r-photo:16px; --r-field:16px; --r-sheet:24px; --r-chip:14px;
   --shadow:0 1px 1px rgba(0,0,0,.10), 0 1px 1.5px rgba(0,0,0,.02);
@@ -38,7 +34,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 #phone{
   width:390px; height:844px; background:var(--paper); position:relative;
   border-radius:44px; overflow:hidden; flex:0 0 auto;
-  box-shadow:0 0 0 10px #191713, 0 26px 60px rgba(0,0,0,.28);
+  box-shadow:0 0 0 10px #14161A, 0 26px 60px rgba(0,0,0,.24);
 }
 #app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;z-index:2;padding-top:max(14px,env(safe-area-inset-top))}
 #lmap{position:absolute;inset:0;display:none;z-index:1;background:var(--line);cursor:grab}
@@ -49,10 +45,23 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .mrk{width:34px;height:34px;border-radius:999px;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;
   box-shadow:0 3px 8px rgba(23,20,15,.28)}
 .mrk.sel{box-shadow:0 0 0 4px rgba(0,71,171,.35), 0 3px 8px rgba(23,20,15,.3)}
-.actbar{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 8px;display:flex;align-items:center;gap:2px;
-  filter:drop-shadow(0 6px 5px rgba(23,20,15,.07))}
+.actbar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px 8px;display:flex;align-items:center;gap:2px;
+  box-shadow:0 6px 20px rgba(17,24,39,.07)}
+.actrow{display:flex;gap:8px;width:100%;align-items:center}
+.abtn{flex:1 0 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;
+  background:#fff;border:1.5px solid var(--edge);border-radius:14px;padding:11px 12px;
+  font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.2px;white-space:nowrap}
+.abtn .n{color:var(--mid);font-weight:700}
+.abtn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.abtn.on .n{color:#D9D4CB}
+.abtn.on.fx .n{color:var(--onBlueGreen)} .abtn.on.nfx .n{color:var(--onBlueRed)}
+.abtn.small{flex:0 0 auto;padding:11px 14px;gap:6px}
+.abtn.plain{border-color:transparent;background:none;padding:11px 10px;color:var(--body)}
+.abtn.plain.on{background:none;color:var(--ink);border-color:transparent}
+.actsep{width:1px;align-self:stretch;background:var(--line);margin:4px 1px;flex:0 0 auto}
 .astack{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 10px;border-radius:16px;min-width:0}
 .astack b{font-size:11px;line-height:14px;letter-spacing:-.1px;white-space:nowrap}
+.astack{border-radius:10px}
 .astack.on{background:var(--blueSoft)}
 .mapcard{position:absolute;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));z-index:22;
   background:#fff;border-radius:var(--r-card);border:1px solid var(--line);box-shadow:0 10px 26px rgba(23,20,15,.14);
@@ -72,31 +81,31 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .batt s{position:absolute;left:2.5px;top:2.5px;width:19px;height:8px;background:var(--ink);border-radius:2.5px}
 
 /* ── type ────────────────────────────────────────────────────────────── */
-.h1{font-size:24px;line-height:34px;font-weight:700;letter-spacing:-.2px}
+.h1{font-size:26px;line-height:33px;font-weight:700;letter-spacing:-.5px}
 .h2{font-size:28px;line-height:34px;font-weight:700;letter-spacing:-.4px}
 .h3{font-size:18.5px;line-height:25px;font-weight:700;letter-spacing:-.2px}
-.subhead{font-size:16px;line-height:22px;font-weight:700;letter-spacing:-.4px}
-.body{font-size:14px;line-height:20px;color:var(--body)}
-.bodyStrong{font-size:14px;line-height:20px;font-weight:700;letter-spacing:-.2px}
-.meta{font-size:12px;line-height:17px;color:var(--mid)}
+.subhead{font-size:16px;line-height:22px;font-weight:600;letter-spacing:-.3px}
+.body{font-size:15px;line-height:22px;color:var(--mid)}
+.bodyStrong{font-size:14px;line-height:20px;font-weight:600;letter-spacing:-.15px}
+.meta{font-size:13px;line-height:18px;color:var(--mid)}
 .metaQ{font-size:12px;line-height:17px;color:var(--mute)}
 .small{font-size:11px;line-height:15px;color:var(--mute)}
 .mid{color:var(--mid)} .mute{color:var(--mute)} .ink{color:var(--ink)}
 
 /* ── shared chrome ───────────────────────────────────────────────────── */
 .header{display:flex;align-items:center;justify-content:space-between;padding:10px 22px;flex:0 0 auto;background:var(--paper)}
-.circbtn{width:38px;height:38px;border-radius:999px;background:#fff;border:1px solid var(--line);
+.circbtn{width:38px;height:38px;border-radius:11px;background:#fff;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .avatar{border-radius:999px;object-fit:cover;flex:0 0 auto;background:var(--line)}
-.pill{border-radius:999px;display:inline-flex;align-items:center;gap:7px;font-weight:700}
-.btn-dark{background:var(--ink);color:#fff;border-radius:999px;padding:17px 20px;display:flex;
+.pill{border-radius:10px;display:inline-flex;align-items:center;gap:7px;font-weight:600}
+.btn-dark{background:var(--ink);color:#fff;border-radius:var(--r-field);padding:16px 20px;display:flex;
   align-items:center;justify-content:center;gap:10px;font-size:15px;font-weight:700;width:100%}
-.btn-blue{background:var(--blue);color:#fff;border-radius:999px;padding:15px 20px;
+.btn-blue{background:var(--blue);color:#fff;border-radius:var(--r-field);padding:15px 20px;
   display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;width:100%}
-.btn-ghost{background:#fff;border:1px solid var(--line);border-radius:999px;padding:15px 20px;
+.btn-ghost{background:#fff;border:1px solid var(--line);border-radius:var(--r-field);padding:15px 20px;
   display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;width:100%}
 .btn-dark[disabled],.btn-blue[disabled]{background:var(--dead);color:var(--deadink);cursor:default}
-.card{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--shadow)}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r-card)}
 .rule{height:1px;background:var(--line);width:100%}
 .tapfx:active{opacity:.62}
 
@@ -114,33 +123,32 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
   box-shadow:0 6px 14px rgba(23,20,15,.14)}
 
 /* ── feed ────────────────────────────────────────────────────────────── */
-.feed{padding:14px 20px 150px;display:flex;flex-direction:column;gap:16px}
+.feed{padding:14px 20px 150px;display:flex;flex-direction:column;gap:12px}
 .scopes{display:flex;gap:8px}
-.scope{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 18px;font-size:14px;font-weight:700}
+.scope{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--body)}
 .scope.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .pincard{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);
-  box-shadow:var(--shadow);padding:17px 16px 14px;display:flex;flex-direction:column}
+  padding:18px 18px 14px;display:flex;flex-direction:column}
 .kicker{display:flex;align-items:baseline;gap:8px;font-size:12px;line-height:17px}
 .kicker .place{color:var(--mid)} .kicker .place b{color:var(--ink);font-weight:700}
 .kicker .t{margin-left:auto;color:var(--mute);white-space:nowrap}
-.byyou{background:var(--blueSoft);color:var(--blueInk);border-radius:999px;white-space:nowrap;flex:0 0 auto;
-  padding:2px 9px;font-size:11px;font-weight:700;line-height:16px}
+.byyou{color:var(--mid);white-space:nowrap;flex:0 0 auto;font-size:12px;font-weight:500;line-height:17px}
+.byyou::before{content:'·';margin:0 5px;color:var(--dash)}
 .byline{display:flex;align-items:center;gap:8px;font-size:12px;line-height:17px;color:var(--mid)}
 .byline b{color:var(--ink)}
 .photo{width:100%;border-radius:var(--r-photo);object-fit:cover;display:block;background:var(--line)}
-.vchip{background:#EAF3EC;color:var(--greenInk);border-radius:999px;padding:3px 10px;
-  font-size:11px;font-weight:700;display:inline-flex;gap:5px;align-items:center;line-height:16px}
+.vchip{color:var(--greenInk);font-size:12px;font-weight:600;display:inline-flex;gap:4px;align-items:center;line-height:17px}
 .price{font-size:24px;line-height:31px;font-weight:700;letter-spacing:-.2px}
 .pricenote{font-size:13px;color:var(--mute);font-weight:400}
 .dateline{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;line-height:20px}
 .pollbox{border:1px solid var(--line);border-radius:var(--r-photo);padding:14px;display:flex;flex-direction:column;gap:8px}
-.pollopt{background:#F7F5F0;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;
+.pollopt{background:var(--paper);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;
   font-size:13px;line-height:18px;position:relative;overflow:hidden}
 .pollopt .fill{position:absolute;inset:0;background:var(--blueSoft);width:0}
 .pollopt span{position:relative}
 .pollopt.mine{box-shadow:inset 0 0 0 1.5px var(--blue)}
 .cardfoot{display:flex;align-items:center;gap:2px}
-.react{display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700}
+.react{display:flex;align-items:center;gap:6px;padding:7px 11px;border-radius:8px;font-size:13px;font-weight:600}
 .react.on{background:var(--blueSoft)}
 .react .n{color:var(--mid)} .react.on .n{color:var(--blueInk)}
 .clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden}
@@ -162,18 +170,13 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .railD .link{margin-top:15px}
 .statusline{font-size:13px;line-height:18px;color:var(--mid)}
 .statusline b{color:var(--ink)}
-.waitband{background:var(--blueSoft);border-radius:14px;padding:10px 10px 10px 14px;display:flex;
-  align-items:center;gap:10px;justify-content:space-between}
-.waitband .w{font-size:13px;font-weight:700;color:var(--blueInk)}
-.waitband .b{background:var(--blue);color:#fff;border-radius:999px;padding:8px 14px;
-  font-size:13px;font-weight:700;display:flex;gap:6px;align-items:center}
 
 /* ── vote ────────────────────────────────────────────────────────────── */
 .votes{display:flex;gap:8px;width:100%}
 .votes.compact{width:auto;flex:0 0 auto}
 .votes.compact .vote{flex:0 0 auto;padding:8px 13px 8px 11px;font-size:12.5px;gap:6px}
 .cardfoot{flex-wrap:nowrap;overflow:hidden}
-.vote{flex:1 0 0;min-width:0;background:#fff;border:1.5px solid var(--blueEdge);border-radius:999px;
+.vote{flex:1 0 0;min-width:0;background:#fff;border:1px solid var(--edge);border-radius:var(--r-field);
   padding:9.5px 16px 9.5px 14px;display:flex;align-items:center;justify-content:center;gap:7px;
   font-size:13px;line-height:18px;font-weight:700;color:var(--body)}
 .vote.mine{background:var(--blueDeep);border-color:var(--blueDeep);color:#fff}
@@ -195,28 +198,29 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .grab{width:38px;height:4px;border-radius:3px;background:#D6D0C6;margin:8px auto 12px;flex:0 0 auto}
 .sheetHead{display:flex;align-items:flex-start;gap:12px;padding-bottom:14px;flex:0 0 auto}
 .sheetHead .t{flex:1}
-.xbtn{width:36px;height:36px;border-radius:999px;background:#fff;border:1px solid var(--line);
+.xbtn{width:36px;height:36px;border-radius:10px;background:#fff;border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .sheetBody{overflow-y:auto;flex:1;margin:0 -20px;padding:0 20px}
 .sheetBody::-webkit-scrollbar{width:0}
-.segs{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px}
-.seg{flex:1;border-radius:999px;padding:10px 6px;text-align:center;font-size:13px;font-weight:700;
+.segs{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg{flex:1;border-radius:8px;padding:10px 6px;text-align:center;font-size:13px;font-weight:700;
   display:flex;gap:6px;align-items:center;justify-content:center}
 .seg.on{background:var(--ink);color:#fff}
 .seg .n{color:var(--mid)} .seg.on .n{color:var(--blueLift)}
 .rows{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+.rows .row{padding:13px 15px}
 .row{display:flex;align-items:center;gap:12px;padding:14px 16px}
 .row+.row{border-top:1px solid var(--line)}
 .rows button.row{width:100%}
 .row .c{flex:1;min-width:0}
 .trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.replychip{border:1px solid var(--line);border-radius:999px;padding:4px 10px;display:flex;gap:5px;
-  align-items:center;font-size:12px;font-weight:700}
+.replychip{border:1px solid var(--line);border-radius:8px;padding:5px 10px;display:flex;gap:5px;
+  align-items:center;font-size:12px;font-weight:600;color:var(--body)}
 
 /* ── composer ────────────────────────────────────────────────────────── */
 .cHead{display:flex;align-items:center;gap:10px;height:58px;padding:10px 16px;flex:0 0 auto}
 .cHead .road{display:flex;align-items:center;gap:5px;font-size:17px;line-height:23px;font-weight:700}
-.cPost{border-radius:999px;padding:9px 17px;font-size:13.5px;font-weight:700;background:var(--dead);color:var(--deadink)}
+.cPost{border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:700;background:var(--dead);color:var(--deadink)}
 .cPost.on{background:var(--blue);color:#fff}
 .cBody{flex:1;overflow-y:auto;padding:8px 20px 28px;display:flex;flex-direction:column;gap:16px}
 .cBody::-webkit-scrollbar{width:0}
@@ -237,14 +241,14 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .sw.ev.on{background:var(--ink)}
 .kindrow{display:flex;gap:8px;padding:12px 16px 0;background:var(--paper);flex:0 0 auto}
 .kind{flex:1 0 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;
-  background:#fff;border:1px solid var(--line);border-radius:999px;padding:12px 10px;font-size:13px}
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 10px;font-size:13px}
 .kind b{font-size:13px;white-space:nowrap}
 .kind.on.issue{background:var(--warn);border-color:var(--warn);color:#fff}
 .kind.on.event{background:var(--blue);border-color:var(--blue);color:#fff}
 .kind.off{opacity:.42}
 .chipdock{background:var(--paper);padding:12px 16px calc(14px + env(safe-area-inset-bottom));display:flex;gap:8px;flex:0 0 auto}
 .chip{flex:1 0 0;min-width:0;background:#fff;border:1px solid var(--line);border-radius:var(--r-chip);
-  height:59px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--mid)}
+  height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--mid)}
 .chip b{font-size:11px;line-height:16px;color:var(--faint)}
 .chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .chip.on b{color:#fff}
@@ -253,13 +257,13 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .keyboard i{position:absolute;background:#fff;border-radius:5px;height:42px}
 .keyboard i.d{background:#ADA79C}
 .keyboard u{position:absolute;left:128px;bottom:8px;width:134px;height:5px;border-radius:3px;background:#8C877C}
-.block{background:#fff;border:1px solid var(--line);border-radius:var(--r-field);padding:14px 16px;position:relative}
+.block{background:#fff;border:1px solid var(--line);border-radius:var(--r-field);padding:14px 15px;position:relative}
 .block .x{position:absolute;right:12px;top:12px;width:22px;height:22px;border-radius:999px;
   background:#EFEBE3;display:flex;align-items:center;justify-content:center;color:var(--mid)}
 .block .lab{font-size:12px;line-height:17px;color:var(--mute)}
 .typechips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
 .typechips::-webkit-scrollbar{height:0}
-.tchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 12px;font-size:13px;font-weight:700;white-space:nowrap;flex:0 0 auto}
+.tchip{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;white-space:nowrap;flex:0 0 auto;color:var(--body)}
 .tchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .wardpanel{background:var(--warnBg);border-radius:var(--r-field);padding:14px 16px}
 .wardpanel .t{color:var(--warn);font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center}
@@ -277,7 +281,7 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .cal button.on{background:var(--ink);color:#fff;font-weight:700}
 .cal button[disabled]{color:#CFC9BF;cursor:default}
 .timechips{display:flex;gap:8px}
-.timechips button{flex:1;border:1px solid var(--line);background:#fff;border-radius:999px;padding:11px 6px;
+.timechips button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:11px 6px;
   text-align:center;font-size:13px;font-weight:700}
 .timechips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 
@@ -287,8 +291,8 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .notice.flat{background:#F1EEE7;color:var(--mid)}
 .notice b{color:var(--ink)}
 .noticeAct{margin-left:auto;font-weight:700;color:var(--blueInk);white-space:nowrap}
-.toast{position:absolute;left:16px;right:16px;bottom:96px;background:var(--ink);color:#fff;
-  border-radius:16px;padding:13px 16px;font-size:13px;line-height:18px;z-index:60;
+  .toast{position:absolute;left:16px;right:16px;bottom:96px;background:var(--ink);color:#fff;
+  border-radius:12px;padding:13px 16px;font-size:13px;line-height:18px;z-index:60;
   display:flex;gap:10px;align-items:center;animation:up .18s}
 .toast .a{margin-left:auto;color:var(--blueLift);font-weight:700}
 .pad{padding:0 20px}
@@ -304,22 +308,21 @@ input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0;wid
 .otp div{flex:1;height:60px;border:1.5px solid var(--line);border-radius:14px;background:#fff;
   display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
 .otp div.cur{border-color:var(--ink);border-width:2px}
-.field{background:#fff;border:2px solid var(--ink);border-radius:var(--r-field);padding:16px;display:flex;gap:14px;align-items:center}
+.field{background:#fff;border:1.5px solid var(--ink);border-radius:var(--r-field);padding:15px 14px;display:flex;gap:14px;align-items:center}
 .field .cc{color:var(--ink);font-weight:700;font-size:17px;padding-right:14px;border-right:1px solid var(--line)}
 .field input{font-size:17px;font-weight:700;letter-spacing:.3px}
-.searchfield{background:#fff;border:1px solid var(--line);border-radius:999px;padding:12px 16px;
+.searchfield{background:#fff;border:1px solid var(--line);border-radius:var(--r-field);padding:12px 14px;
   display:flex;gap:10px;align-items:center}
 .roadstrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
 .roadstrip::-webkit-scrollbar{height:0}
-.rchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 16px;
-  font-size:14px;font-weight:700;white-space:nowrap;display:flex;gap:7px;align-items:center;flex:0 0 auto}
+.rchip{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 14px;
+  font-size:14px;font-weight:600;white-space:nowrap;display:flex;gap:7px;align-items:center;flex:0 0 auto}
 .rchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.rchip.empty{border:1.5px dashed var(--dash);color:var(--mute);background:none}
-.sectlabel{font-size:11px;letter-spacing:.8px;font-weight:700;color:var(--mute);text-transform:uppercase}
-.nowpill{background:var(--ink);color:#fff;border-radius:999px;padding:6px 12px;font-size:12px;
-  font-weight:700;display:flex;gap:6px;align-items:center}
-.labelchip{background:var(--blueSoft);color:var(--blueInk);border-radius:999px;padding:2px 9px;
-  font-size:11px;font-weight:700;line-height:16px}
+.rchip.empty{border:1px dashed var(--dash);color:var(--mute);background:none}
+.sectlabel{font-size:11px;letter-spacing:.6px;font-weight:600;color:var(--mute);text-transform:uppercase}
+.nowpill{color:var(--blueInk);font-size:12px;font-weight:600;display:flex;gap:5px;align-items:center}
+.labelchip{color:var(--mid);font-size:12px;font-weight:500;line-height:17px}
+.labelchip::before{content:'·';margin-right:5px;color:var(--dash)}
 .star{color:var(--blue)} .star.off{color:#D8D2C7}
 
 /* ── developer panel (outside the phone) ─────────────────────────────── */
@@ -1079,6 +1082,42 @@ const I = (()=> {
     retry:     s('<path d="M15 9A6 6 0 1 1 12.9 4.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.6 1.8V5.2H12.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'),
   };
 })();
+
+/* ── icons taken straight from the Figma file ─────────────────────────── */
+Object.assign(I, {
+  "place": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.99995 1.42499C7.42854 1.42499 5.9215 2.04923 4.81034 3.16038C3.69919 4.27153 3.07495 5.77858 3.07495 7.34999C3.07495 11.475 8.02495 15.975 8.39995 16.35C8.56496 16.4976 8.77857 16.5792 8.99995 16.5792C9.22133 16.5792 9.43495 16.4976 9.59995 16.35C9.97495 15.975 14.925 11.475 14.925 7.34999C14.925 5.77858 14.3007 4.27153 13.1896 3.16038C12.0784 2.04923 10.5714 1.42499 8.99995 1.42499ZM8.99995 5.24999C9.59669 5.24999 10.169 5.48704 10.5909 5.909C11.0129 6.33095 11.25 6.90325 11.25 7.49999C11.25 8.09672 11.0129 8.66902 10.5909 9.09098C10.169 9.51294 9.59669 9.74999 8.99995 9.74999C8.40321 9.74999 7.83092 9.51294 7.40896 9.09098C6.987 8.66902 6.74995 8.09672 6.74995 7.49999C6.74995 6.90325 6.987 6.33095 7.40896 5.909C7.83092 5.48704 8.40321 5.24999 8.99995 5.24999Z" fill="currentColor"/></svg>',
+  "person": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.99995 1.95001C9.93484 1.95001 10.8314 2.3214 11.4925 2.98246C12.1536 3.64353 12.525 4.54012 12.525 5.47501C12.525 6.4099 12.1536 7.3065 11.4925 7.96756C10.8314 8.62863 9.93484 9.00001 8.99995 9.00001C8.06506 9.00001 7.16847 8.62863 6.5074 7.96756C5.84633 7.3065 5.47495 6.4099 5.47495 5.47501C5.47495 4.54012 5.84633 3.64353 6.5074 2.98246C7.16847 2.3214 8.06506 1.95001 8.99995 1.95001ZM2.69995 14.7C2.69995 11.85 5.51995 10.05 8.99995 10.05C12.48 10.05 15.3 11.85 15.3 14.7C15.3 15.0581 15.1577 15.4014 14.9045 15.6546C14.6514 15.9078 14.308 16.05 13.95 16.05H4.04995C3.69191 16.05 3.34853 15.9078 3.09536 15.6546C2.84218 15.4014 2.69995 15.0581 2.69995 14.7Z" fill="currentColor"/></svg>',
+  "lock": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.99995 1.34961C7.92582 1.34961 6.89569 1.7763 6.13617 2.53583C5.37665 3.29535 4.94995 4.32548 4.94995 5.39961V7.04961H4.64995C4.13278 7.04961 3.63679 7.25505 3.27109 7.62075C2.9054 7.98645 2.69995 8.48244 2.69995 8.99961V14.6996C2.69995 15.2168 2.9054 15.7128 3.27109 16.0785C3.63679 16.4442 4.13278 16.6496 4.64995 16.6496H13.35C13.606 16.6496 13.8596 16.5992 14.0962 16.5012C14.3328 16.4032 14.5477 16.2595 14.7288 16.0785C14.9099 15.8974 15.0535 15.6824 15.1515 15.4458C15.2495 15.2093 15.3 14.9557 15.3 14.6996V8.99961C15.3 8.74353 15.2495 8.48996 15.1515 8.25338C15.0535 8.01679 14.9099 7.80183 14.7288 7.62075C14.5477 7.43968 14.3328 7.29604 14.0962 7.19804C13.8596 7.10005 13.606 7.04961 13.35 7.04961H13.05V5.39961C13.05 4.32548 12.6233 3.29535 11.8637 2.53583C11.1042 1.7763 10.0741 1.34961 8.99995 1.34961ZM8.99995 3.74961C9.43756 3.74961 9.85724 3.92345 10.1667 4.23288C10.4761 4.54232 10.65 4.962 10.65 5.39961V7.04961H7.34995V5.39961C7.34995 4.962 7.52379 4.54232 7.83323 4.23288C8.14266 3.92345 8.56234 3.74961 8.99995 3.74961Z" fill="currentColor"/></svg>',
+  "logout": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.2 1.7998C6.68283 1.7998 6.18684 2.00525 5.82114 2.37095C5.45545 2.73664 5.25 3.23263 5.25 3.7498V14.2498C5.25 14.5059 5.30044 14.7595 5.39843 14.996C5.49643 15.2326 5.64007 15.4476 5.82114 15.6287C6.00222 15.8097 6.21718 15.9534 6.45377 16.0514C6.69035 16.1494 6.94392 16.1998 7.2 16.1998H10.8C11.0561 16.1998 11.3096 16.1494 11.5462 16.0514C11.7828 15.9534 11.9978 15.8097 12.1789 15.6287C12.3599 15.4476 12.5036 15.2326 12.6016 14.996C12.6996 14.7595 12.75 14.5059 12.75 14.2498V12.5998C12.75 12.2815 12.6236 11.9763 12.3985 11.7513C12.1735 11.5262 11.8683 11.3998 11.55 11.3998C11.2317 11.3998 10.9265 11.5262 10.7015 11.7513C10.4764 11.9763 10.35 12.2815 10.35 12.5998V13.7998H7.65V4.1998H10.35V5.3998C10.35 5.71806 10.4764 6.02329 10.7015 6.24833C10.9265 6.47338 11.2317 6.5998 11.55 6.5998C11.8683 6.5998 12.1735 6.47338 12.3985 6.24833C12.6236 6.02329 12.75 5.71806 12.75 5.3998V3.7498C12.75 3.23263 12.5446 2.73664 12.1789 2.37095C11.8132 2.00525 11.3172 1.7998 10.8 1.7998H7.2ZM14.175 6.0748C14.0593 6.1867 13.9673 6.32072 13.9045 6.4689C13.8417 6.61707 13.8093 6.77636 13.8093 6.9373C13.8093 7.09824 13.8417 7.25754 13.9045 7.40571C13.9673 7.55389 14.0593 7.68791 14.175 7.7998L14.4 8.0248H10.65C10.3317 8.0248 10.0265 8.15123 9.80147 8.37628C9.57643 8.60132 9.45 8.90654 9.45 9.2248C9.45 9.54306 9.57643 9.84829 9.80147 10.0733C10.0265 10.2984 10.3317 10.4248 10.65 10.4248H14.4L14.175 10.6498C14.0617 10.7631 13.9719 10.8975 13.9106 11.0455C13.8493 11.1935 13.8177 11.3521 13.8177 11.5123C13.8177 11.6725 13.8493 11.8311 13.9106 11.9791C13.9719 12.1271 14.0617 12.2615 14.175 12.3748C14.2883 12.4881 14.4227 12.5779 14.5707 12.6392C14.7187 12.7005 14.8773 12.7321 15.0375 12.7321C15.1977 12.7321 15.3563 12.7005 15.5043 12.6392C15.6523 12.5779 15.7867 12.4881 15.9 12.3748L18.15 10.1248C18.2657 10.0129 18.3577 9.87889 18.4205 9.73071C18.4833 9.58254 18.5157 9.42325 18.5157 9.26231C18.5157 9.10137 18.4833 8.94207 18.4205 8.7939C18.3577 8.64572 18.2657 8.5117 18.15 8.3998L15.9 6.1498C15.7881 6.03413 15.6541 5.94214 15.5059 5.87932C15.3577 5.8165 15.1984 5.78413 15.0375 5.78413C14.8766 5.78413 14.7173 5.8165 14.5691 5.87932C14.4209 5.94214 14.2869 6.03413 14.175 6.1498V6.0748Z" fill="currentColor"/></svg>',
+  "home": '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L18.4 9.2H15.8V17.8H4.20001V9.2H1.60001L10 2Z" fill="currentColor"/></svg>',
+  "explore": '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 18.3996C14.6392 18.3996 18.4 14.6388 18.4 9.99961C18.4 5.36042 14.6392 1.59961 10 1.59961C5.36081 1.59961 1.60001 5.36042 1.60001 9.99961C1.60001 14.6388 5.36081 18.3996 10 18.3996Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M13.4 6.59961L8.60001 8.59961L6.60001 13.3996L11.4 11.3996L13.4 6.59961Z" fill="var(--knock,#fff)"/></svg>',
+  "gather": '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path d="M2.4 4.59961H17.6V17.5996H2.4V4.59961Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M2.4 8.19922H17.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+  "search": '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path d="M8.6 14.5996C11.9137 14.5996 14.6 11.9133 14.6 8.59961C14.6 5.2859 11.9137 2.59961 8.6 2.59961C5.28629 2.59961 2.6 5.2859 2.6 8.59961C2.6 11.9133 5.28629 14.5996 8.6 14.5996Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M13.2 13.1992L17.6 17.5992" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+  "camera": '<svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.90909 6.10977H5.72727L7.25454 4.00977H13.7455L15.2727 6.10977H19.0909V17.5643H1.90909V6.10977Z" fill="currentColor"/><path d="M10.5 14.8913C12.2924 14.8913 13.7455 13.4383 13.7455 11.6458C13.7455 9.85343 12.2924 8.40039 10.5 8.40039C8.70759 8.40039 7.25455 9.85343 7.25455 11.6458C7.25455 13.4383 8.70759 14.8913 10.5 14.8913Z" fill="var(--knock,#fff)"/></svg>',
+  "send": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.16 9.00086L15.84 2.88086L11.52 15.3009L2.16 9.00086Z" fill="currentColor"/></svg>',
+  "plus": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.0001 2.10001C9.35814 2.10001 9.70152 2.24224 9.95469 2.49541C10.2079 2.74859 10.3501 3.09196 10.3501 3.45001V7.65001H14.5501C14.9081 7.65001 15.2515 7.79224 15.5047 8.04541C15.7579 8.29859 15.9001 8.64196 15.9001 9.00001C15.9001 9.35805 15.7579 9.70143 15.5047 9.9546C15.2515 10.2078 14.9081 10.35 14.5501 10.35H10.3501V14.55C10.3501 14.908 10.2079 15.2514 9.95469 15.5046C9.70152 15.7578 9.35814 15.9 9.0001 15.9C8.64206 15.9 8.29868 15.7578 8.0455 15.5046C7.79233 15.2514 7.6501 14.908 7.6501 14.55V10.35H3.4501C3.09206 10.35 2.74868 10.2078 2.4955 9.9546C2.24233 9.70143 2.1001 9.35805 2.1001 9.00001C2.1001 8.64196 2.24233 8.29859 2.4955 8.04541C2.74868 7.79224 3.09206 7.65001 3.4501 7.65001H7.6501V3.45001C7.6501 3.09196 7.79233 2.74859 8.0455 2.49541C8.29868 2.24224 8.64206 2.10001 9.0001 2.10001Z" fill="currentColor"/></svg>',
+  "clock": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.0001 1.35001C6.97119 1.35001 5.02538 2.15599 3.59073 3.59064C2.15608 5.02529 1.3501 6.9711 1.3501 9.00001C1.3501 11.0289 2.15608 12.9747 3.59073 14.4094C5.02538 15.844 6.97119 16.65 9.0001 16.65C11.029 16.65 12.9748 15.844 14.4095 14.4094C15.8441 12.9747 16.6501 11.0289 16.6501 9.00001C16.6501 6.9711 15.8441 5.02529 14.4095 3.59064C12.9748 2.15599 11.029 1.35001 9.0001 1.35001ZM9.0001 4.65001C9.27857 4.65001 9.54565 4.76063 9.74256 4.95754C9.93947 5.15446 10.0501 5.42153 10.0501 5.70001V8.71501L12.0151 9.84001C12.2568 9.97924 12.4332 10.2088 12.5057 10.4781C12.5781 10.7475 12.5406 11.0346 12.4013 11.2763C12.2621 11.5179 12.0326 11.6944 11.7632 11.7668C11.4939 11.8393 11.2068 11.8017 10.9651 11.6625L8.4751 10.2225C8.31575 10.1305 8.18337 9.99824 8.09123 9.83897C7.99909 9.6797 7.95042 9.49901 7.9501 9.31501V5.70001C7.9501 5.42153 8.06072 5.15446 8.25764 4.95754C8.45455 4.76063 8.72162 4.65001 9.0001 4.65001Z" fill="currentColor"/></svg>',
+  "tag": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.4751 1.65C8.77174 1.64927 9.06559 1.70721 9.33975 1.82048C9.61391 1.93375 9.86297 2.10011 10.0726 2.31L16.4476 8.685C16.8689 9.10688 17.1056 9.67875 17.1056 10.275C17.1056 10.8713 16.8689 11.4431 16.4476 11.865L11.9476 16.365C11.5257 16.7864 10.9538 17.023 10.3576 17.023C9.76135 17.023 9.18947 16.7864 8.7676 16.365L2.3926 9.99C2.18225 9.78188 2.01502 9.53432 1.90048 9.26149C1.78594 8.98865 1.72634 8.6959 1.7251 8.4L2.1751 3.675C2.22497 3.15483 2.45434 2.66824 2.82384 2.29874C3.19334 1.92924 3.67993 1.69987 4.2001 1.65H8.4751ZM5.7751 4.35C5.37727 4.35 4.99574 4.50804 4.71444 4.78934C4.43313 5.07064 4.2751 5.45218 4.2751 5.85C4.2751 6.24783 4.43313 6.62936 4.71444 6.91066C4.99574 7.19197 5.37727 7.35 5.7751 7.35C6.17292 7.35 6.55445 7.19197 6.83576 6.91066C7.11706 6.62936 7.2751 6.24783 7.2751 5.85C7.2751 5.45218 7.11706 5.07064 6.83576 4.78934C6.55445 4.50804 6.17292 4.35 5.7751 4.35Z" fill="currentColor"/></svg>',
+  "map": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.74994 1.42505L2.54994 2.88755C2.23446 3.0106 1.96447 3.22774 1.77663 3.50951C1.58879 3.79127 1.49219 4.124 1.49994 4.46255V14.5125C1.49994 15.3825 2.35494 15.99 3.17244 15.6975L6.74994 14.4V1.42505Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8.25 1.42505V14.4L11.55 15.5625V2.58755L8.25 1.42505Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M13.0498 2.58745V15.5624L15.4498 14.7224C15.7629 14.6003 16.0311 14.3854 16.2188 14.1067C16.4064 13.8279 16.5045 13.4985 16.4998 13.1624V3.11245C16.4998 2.24245 15.6448 1.63495 14.8273 1.92745L13.0498 2.58745Z" fill="currentColor"/></svg>',
+  "q": '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.86674 1.2002C5.53341 1.2002 3.66674 2.6002 3.26674 4.66686C3.24378 4.99214 3.34082 5.31456 3.53951 5.57313C3.73819 5.8317 4.02474 6.00849 4.34497 6.07008C4.66519 6.13166 4.99688 6.07375 5.27729 5.90732C5.55771 5.74088 5.76741 5.47746 5.86674 5.16686C6.04674 4.2602 6.80007 3.73353 7.86674 3.73353C9.03341 3.73353 9.80007 4.36686 9.80007 5.23353C9.80007 5.93353 9.46674 6.36686 8.50007 6.96686C7.26674 7.73353 6.60007 8.53353 6.60007 9.86686V10.2669C6.60007 10.6205 6.74055 10.9596 6.9906 11.2097C7.24064 11.4597 7.57978 11.6002 7.9334 11.6002C8.28703 11.6002 8.62617 11.4597 8.87621 11.2097C9.12626 10.9596 9.26674 10.6205 9.26674 10.2669V10.0002C9.26674 9.43353 9.50007 9.13353 10.2667 8.66686C11.7334 7.76686 12.4667 6.76686 12.4667 5.2002C12.4667 2.93353 10.5334 1.2002 7.86674 1.2002ZM7.9334 12.2669C7.73204 12.2669 7.53266 12.3065 7.34662 12.3836C7.16059 12.4606 6.99156 12.5736 6.84917 12.716C6.70679 12.8583 6.59385 13.0274 6.51679 13.2134C6.43973 13.3994 6.40007 13.5988 6.40007 13.8002C6.40007 14.0016 6.43973 14.2009 6.51679 14.387C6.59385 14.573 6.70679 14.742 6.84917 14.8844C6.99156 15.0268 7.16059 15.1398 7.34662 15.2168C7.53266 15.2939 7.73204 15.3335 7.9334 15.3335C8.34007 15.3335 8.73008 15.172 9.01763 14.8844C9.30519 14.5969 9.46674 14.2069 9.46674 13.8002C9.46674 13.3935 9.30519 13.0035 9.01763 12.716C8.73008 12.4284 8.34007 12.2669 7.9334 12.2669Z" fill="currentColor"/></svg>',
+  "sparkles": '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.00016 1.06689C8.3335 1.06689 8.62016 1.29356 8.70016 1.62023L9.70016 5.63356L13.7135 6.63356C13.8707 6.6714 14.0105 6.76102 14.1105 6.88799C14.2106 7.01497 14.265 7.17191 14.265 7.33356C14.265 7.49521 14.2106 7.65215 14.1105 7.77913C14.0105 7.90611 13.8707 7.99573 13.7135 8.03356L9.70016 9.03356L8.70016 13.0469C8.66233 13.2041 8.57271 13.3439 8.44573 13.4439C8.31875 13.544 8.16181 13.5984 8.00016 13.5984C7.83851 13.5984 7.68157 13.544 7.55459 13.4439C7.42762 13.3439 7.338 13.2041 7.30016 13.0469L6.30016 9.03356L2.28683 8.03356C2.12967 7.99573 1.98982 7.90611 1.88978 7.77913C1.78975 7.65215 1.73535 7.49521 1.73535 7.33356C1.73535 7.17191 1.78975 7.01497 1.88978 6.88799C1.98982 6.76102 2.12967 6.6714 2.28683 6.63356L6.30016 5.63356L7.30016 1.62023C7.33764 1.46273 7.4271 1.32245 7.55411 1.22205C7.68112 1.12166 7.83826 1.06699 8.00016 1.06689Z" fill="currentColor"/></svg>',
+  "walk": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.125 1.34998C10.6023 1.34998 11.0602 1.53962 11.3977 1.87718C11.7353 2.21475 11.925 2.67259 11.925 3.14998C11.925 3.62737 11.7353 4.0852 11.3977 4.42277C11.0602 4.76033 10.6023 4.94998 10.125 4.94998C9.64756 4.94998 9.18972 4.76033 8.85216 4.42277C8.51459 4.0852 8.32495 3.62737 8.32495 3.14998C8.32495 2.67259 8.51459 2.21475 8.85216 1.87718C9.18972 1.53962 9.64756 1.34998 10.125 1.34998Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M9.67497 5.55C10.425 5.55 11.115 5.9625 11.4525 6.6375L12.75 8.25006L14.1 9.58499C14.228 9.64901 14.3422 9.73763 14.436 9.84577C14.5298 9.95392 14.6014 10.0795 14.6466 10.2153C14.6919 10.3511 14.71 10.4945 14.6998 10.6373C14.6897 10.7801 14.6515 10.9195 14.5875 11.0475C14.5235 11.1755 14.4348 11.2897 14.3267 11.3835C14.2186 11.4773 14.093 11.5489 13.9572 11.5941C13.8214 11.6394 13.678 11.6575 13.5352 11.6473C13.3924 11.6372 13.253 11.599 13.125 11.535L11.4525 10.0707L12.3525 12.2325L13.5525 15.4425C13.6076 15.5902 13.6331 15.7474 13.6276 15.905C13.622 16.0626 13.5854 16.2175 13.52 16.361C13.4545 16.5045 13.3614 16.6336 13.246 16.7411C13.1306 16.8486 12.9952 16.9323 12.8475 16.9875C12.6997 17.0426 12.5426 17.0682 12.385 17.0626C12.2274 17.057 12.0724 17.0204 11.929 16.955C11.7855 16.8895 11.6563 16.7964 11.5488 16.681C11.4413 16.5657 11.3576 16.4302 11.3025 16.2825L10.1025 13.0575L9.86247 12.2325L9.09748 13.6125L8.64748 16.1775C8.62581 16.3375 8.57209 16.4915 8.48952 16.6302C8.40694 16.7689 8.29722 16.8896 8.16693 16.9849C8.03663 17.0803 7.88843 17.1483 7.73121 17.185C7.57399 17.2218 7.41097 17.2264 7.25192 17.1986C7.09288 17.1708 6.94107 17.1113 6.80559 17.0234C6.67011 16.9356 6.55375 16.8214 6.46347 16.6875C6.37319 16.5537 6.31085 16.403 6.28018 16.2444C6.24951 16.0859 6.25114 15.9229 6.28498 15.765L6.80998 12.75C6.84748 12.555 7.48118 10.17 7.48118 10.17L7.79248 8.2875L7.125 9.37506L6.72748 10.17C6.69142 10.3159 6.62552 10.4527 6.53392 10.5719C6.44233 10.6911 6.32703 10.7899 6.1953 10.8623C6.06358 10.9346 5.91828 10.9789 5.76859 10.9923C5.61889 11.0057 5.46805 10.9879 5.32557 10.9401C5.1831 10.8922 5.05209 10.8154 4.9408 10.7144C4.82952 10.6133 4.74038 10.4904 4.67902 10.3532C4.61765 10.216 4.58538 10.0676 4.58426 9.91727C4.58313 9.76698 4.61317 9.61809 4.67248 9.48L5.32557 8.2875C5.39307 8.0925 5.49057 7.9125 5.62557 7.7625L6.84748 6C7.02345 5.80183 7.23943 5.64322 7.48118 5.53463C7.72293 5.42604 7.98496 5.36992 8.24998 5.37L9.67497 5.55Z" fill="currentColor"/></svg>',
+  "bell": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.00003 1.4248C7.62753 1.4248 6.31125 1.97003 5.34075 2.94053C4.37025 3.91103 3.82503 5.22731 3.82503 6.5998C3.82503 9.14981 3.30003 10.4998 2.77503 11.2498C2.63569 11.4413 2.55245 11.6678 2.53462 11.904C2.5168 12.1402 2.5651 12.3766 2.67412 12.5869C2.78314 12.7971 2.94856 12.9728 3.15184 13.0943C3.35512 13.2158 3.58823 13.2783 3.82503 13.2748H14.175C14.4118 13.2783 14.6449 13.2158 14.8482 13.0943C15.0515 12.9728 15.2169 12.7971 15.3259 12.5869C15.435 12.3766 15.4833 12.1402 15.4654 11.904C15.4476 11.6678 15.3644 11.4413 15.225 11.2498C14.7 10.4998 14.175 9.14981 14.175 6.5998C14.175 5.22731 13.6298 3.91103 12.6593 2.94053C11.6888 1.97003 10.3725 1.4248 9.00003 1.4248ZM9.00003 16.5748C9.52968 16.5721 10.0453 16.4046 10.4754 16.0955C10.9055 15.7864 11.2287 15.351 11.4 14.8498H6.60003C6.77138 15.351 7.09454 15.7864 7.52463 16.0955C7.95471 16.4046 8.47038 16.5721 9.00003 16.5748Z" fill="currentColor"/></svg>',
+  "sort": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.69995 3.4498C2.69995 3.11165 2.83428 2.78735 3.07339 2.54824C3.3125 2.30913 3.6368 2.1748 3.97495 2.1748H14.025C14.3631 2.1748 14.6874 2.30913 14.9265 2.54824C15.1656 2.78735 15.3 3.11165 15.3 3.4498C15.3 3.78796 15.1656 4.11226 14.9265 4.35137C14.6874 4.59047 14.3631 4.7248 14.025 4.7248H3.97495C3.6368 4.7248 3.3125 4.59047 3.07339 4.35137C2.83428 4.11226 2.69995 3.78796 2.69995 3.4498ZM2.69995 8.9998C2.69995 8.66165 2.83428 8.33735 3.07339 8.09824C3.3125 7.85913 3.6368 7.7248 3.97495 7.7248H10.725C11.0631 7.7248 11.3874 7.85913 11.6265 8.09824C11.8656 8.33735 12 8.66165 12 8.9998C12 9.33796 11.8656 9.66226 11.6265 9.90137C11.3874 10.1405 11.0631 10.2748 10.725 10.2748H3.97495C3.80752 10.2748 3.64172 10.2418 3.48703 10.1778C3.33234 10.1137 3.19178 10.0198 3.07339 9.90137C2.955 9.78297 2.86108 9.64242 2.797 9.48773C2.73293 9.33304 2.69995 9.16724 2.69995 8.9998ZM2.69995 14.5498C2.69995 14.2117 2.83428 13.8874 3.07339 13.6482C3.3125 13.4091 3.6368 13.2748 3.97495 13.2748H7.42495C7.7631 13.2748 8.0874 13.4091 8.32651 13.6482C8.56562 13.8874 8.69995 14.2117 8.69995 14.5498C8.69995 14.888 8.56562 15.2123 8.32651 15.4514C8.0874 15.6905 7.7631 15.8248 7.42495 15.8248H3.97495C3.6368 15.8248 3.3125 15.6905 3.07339 15.4514C2.83428 15.2123 2.69995 14.888 2.69995 14.5498Z" fill="currentColor"/></svg>',
+  "back": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.6248 2.39996C11.863 2.63894 11.9967 2.96257 11.9967 3.29996C11.9967 3.63734 11.863 3.96098 11.6248 4.19996L6.82481 8.99996L11.6248 13.8C11.7547 13.9154 11.8596 14.0561 11.9331 14.2136C12.0066 14.371 12.0472 14.5418 12.0523 14.7155C12.0574 14.8892 12.027 15.062 11.9628 15.2235C11.8987 15.385 11.8023 15.5317 11.6794 15.6546C11.5565 15.7774 11.4099 15.8739 11.2484 15.938C11.0869 16.0021 10.914 16.0325 10.7403 16.0274C10.5667 16.0223 10.3959 15.9818 10.2384 15.9083C10.081 15.8347 9.94023 15.7298 9.82481 15.6L4.12481 9.89996C3.88665 9.66098 3.75293 9.33734 3.75293 8.99996C3.75293 8.66257 3.88665 8.33894 4.12481 8.09996L9.82481 2.39996C10.0638 2.1618 10.3874 2.02808 10.7248 2.02808C11.0622 2.02808 11.3858 2.1618 11.6248 2.39996Z" fill="currentColor"/></svg>',
+  "close": '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 3.00055C3.21866 2.78275 3.51471 2.66046 3.82333 2.66046C4.13196 2.66046 4.42801 2.78275 4.64667 3.00055L8 6.35388L11.3533 3.00055C11.4587 2.88101 11.5875 2.78433 11.7317 2.71648C11.8759 2.64863 12.0325 2.61104 12.1918 2.60604C12.3511 2.60104 12.5097 2.62873 12.6579 2.6874C12.8061 2.74607 12.9407 2.83448 13.0534 2.94718C13.1661 3.05987 13.2545 3.19446 13.3131 3.34264C13.3718 3.49082 13.3995 3.64945 13.3945 3.80874C13.3895 3.96804 13.3519 4.12462 13.2841 4.26883C13.2162 4.41304 13.1195 4.54181 13 4.64722L9.64667 8.00055L13 11.3539C13.1195 11.4593 13.2162 11.5881 13.2841 11.7323C13.3519 11.8765 13.3895 12.0331 13.3945 12.1924C13.3995 12.3516 13.3718 12.5103 13.3131 12.6585C13.2545 12.8066 13.1661 12.9412 13.0534 13.0539C12.9407 13.1666 12.8061 13.255 12.6579 13.3137C12.5097 13.3724 12.3511 13.4001 12.1918 13.3951C12.0325 13.3901 11.8759 13.3525 11.7317 13.2846C11.5875 13.2168 11.4587 13.1201 11.3533 13.0005L8 9.64722L4.64667 13.0005C4.54126 13.1201 4.41249 13.2168 4.26828 13.2846C4.12407 13.3525 3.96749 13.3901 3.80819 13.3951C3.6489 13.4001 3.49027 13.3724 3.34209 13.3137C3.19391 13.255 3.05932 13.1666 2.94663 13.0539C2.83393 12.9412 2.74553 12.8066 2.68685 12.6585C2.62818 12.5103 2.60049 12.3516 2.60549 12.1924C2.61049 12.0331 2.64808 11.8765 2.71593 11.7323C2.78378 11.5881 2.88046 11.4593 3 11.3539L6.35333 8.00055L3 4.64722C2.7822 4.42856 2.65991 4.13251 2.65991 3.82388C2.65991 3.51526 2.7822 3.21921 3 3.00055Z" fill="currentColor"/></svg>',
+  "cross": '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 3.00055C3.21866 2.78275 3.51471 2.66046 3.82333 2.66046C4.13196 2.66046 4.42801 2.78275 4.64667 3.00055L8 6.35388L11.3533 3.00055C11.4587 2.88101 11.5875 2.78433 11.7317 2.71648C11.8759 2.64863 12.0325 2.61104 12.1918 2.60604C12.3511 2.60104 12.5097 2.62873 12.6579 2.6874C12.8061 2.74607 12.9407 2.83448 13.0534 2.94718C13.1661 3.05987 13.2545 3.19446 13.3131 3.34264C13.3718 3.49082 13.3995 3.64945 13.3945 3.80874C13.3895 3.96804 13.3519 4.12462 13.2841 4.26883C13.2162 4.41304 13.1195 4.54181 13 4.64722L9.64667 8.00055L13 11.3539C13.1195 11.4593 13.2162 11.5881 13.2841 11.7323C13.3519 11.8765 13.3895 12.0331 13.3945 12.1924C13.3995 12.3516 13.3718 12.5103 13.3131 12.6585C13.2545 12.8066 13.1661 12.9412 13.0534 13.0539C12.9407 13.1666 12.8061 13.255 12.6579 13.3137C12.5097 13.3724 12.3511 13.4001 12.1918 13.3951C12.0325 13.3901 11.8759 13.3525 11.7317 13.2846C11.5875 13.2168 11.4587 13.1201 11.3533 13.0005L8 9.64722L4.64667 13.0005C4.54126 13.1201 4.41249 13.2168 4.26828 13.2846C4.12407 13.3525 3.96749 13.3901 3.80819 13.3951C3.6489 13.4001 3.49027 13.3724 3.34209 13.3137C3.19391 13.255 3.05932 13.1666 2.94663 13.0539C2.83393 12.9412 2.74553 12.8066 2.68685 12.6585C2.62818 12.5103 2.60049 12.3516 2.60549 12.1924C2.61049 12.0331 2.64808 11.8765 2.71593 11.7323C2.78378 11.5881 2.88046 11.4593 3 11.3539L6.35333 8.00055L3 4.64722C2.7822 4.42856 2.65991 4.13251 2.65991 3.82388C2.65991 3.51526 2.7822 3.21921 3 3.00055Z" fill="currentColor"/></svg>',
+  "chevron": '<svg viewBox="0 0 17 17" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.02083 2.26724C5.79591 2.49294 5.66961 2.79859 5.66961 3.11724C5.66961 3.43588 5.79591 3.74153 6.02083 3.96724L10.5542 8.50057L6.02083 13.0339C5.89817 13.1429 5.79909 13.2758 5.72966 13.4245C5.66023 13.5732 5.62193 13.7345 5.6171 13.8986C5.61227 14.0626 5.64102 14.2259 5.70158 14.3784C5.76214 14.5309 5.85324 14.6694 5.96927 14.7855C6.08531 14.9015 6.22384 14.9926 6.37635 15.0532C6.52887 15.1137 6.69215 15.1425 6.85618 15.1376C7.02021 15.1328 7.18152 15.0945 7.33021 15.0251C7.4789 14.9556 7.61182 14.8566 7.72083 14.7339L13.1042 9.35057C13.3291 9.12486 13.4554 8.81921 13.4554 8.50057C13.4554 8.18193 13.3291 7.87627 13.1042 7.65057L7.72083 2.26724C7.49513 2.04231 7.18948 1.91602 6.87083 1.91602C6.55219 1.91602 6.24654 2.04231 6.02083 2.26724Z" fill="currentColor"/></svg>',
+  "chevdown": '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.13333 5.66758C2.34576 5.45589 2.63343 5.33702 2.93333 5.33702C3.23323 5.33702 3.52091 5.45589 3.73333 5.66758L8 9.93425L12.2667 5.66758C12.3693 5.55214 12.4944 5.45888 12.6343 5.39354C12.7743 5.3282 12.9261 5.29214 13.0805 5.2876C13.2348 5.28306 13.3885 5.31011 13.5321 5.36711C13.6756 5.42411 13.806 5.50985 13.9152 5.61906C14.0244 5.72827 14.1101 5.85864 14.1671 6.00219C14.2241 6.14573 14.2512 6.29941 14.2466 6.45379C14.2421 6.60817 14.2061 6.75999 14.1407 6.89993C14.0754 7.03988 13.9821 7.16499 13.8667 7.26758L8.8 12.3342C8.58757 12.5459 8.2999 12.6648 8 12.6648C7.7001 12.6648 7.41243 12.5459 7.2 12.3342L2.13333 7.26758C1.92164 7.05516 1.80277 6.76748 1.80277 6.46758C1.80277 6.16768 1.92164 5.88001 2.13333 5.66758Z" fill="currentColor"/></svg>',
+  "share": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 1.19995C9.315 1.19995 9.615 1.31995 9.84 1.54495L12.765 4.43995C12.9918 4.66373 13.1203 4.96842 13.1224 5.287C13.1246 5.60557 13 5.91194 12.7762 6.1387C12.5525 6.36546 12.2478 6.49404 11.9292 6.49615C11.6106 6.49826 11.3043 6.37373 11.0775 6.14995L10.2 5.23495V10.8C10.2 11.1182 10.0736 11.4234 9.84853 11.6485C9.62348 11.8735 9.31826 12 9 12C8.68174 12 8.37652 11.8735 8.15147 11.6485C7.92643 11.4234 7.8 11.1182 7.8 10.8V5.23495L6.9225 6.14995C6.69574 6.37373 6.38937 6.49826 6.0708 6.49615C5.75222 6.49404 5.44753 6.36546 5.22375 6.1387C4.99997 5.91194 4.87544 5.60557 4.87755 5.287C4.87966 4.96842 5.00824 4.66373 5.235 4.43995L8.16 1.54495C8.385 1.31995 8.685 1.19995 9 1.19995ZM3.45 9.89995C3.76826 9.89995 4.07348 10.0264 4.29853 10.2514C4.52357 10.4765 4.65 10.7817 4.65 11.1V13.65H13.35V11.1C13.35 10.7817 13.4764 10.4765 13.7015 10.2514C13.9265 10.0264 14.2317 9.89995 14.55 9.89995C14.8683 9.89995 15.1735 10.0264 15.3985 10.2514C15.6236 10.4765 15.75 10.7817 15.75 11.1V14.25C15.75 14.7273 15.5604 15.1852 15.2228 15.5227C14.8852 15.8603 14.4274 16.05 13.95 16.05H4.05C3.57261 16.05 3.11477 15.8603 2.77721 15.5227C2.43964 15.1852 2.25 14.7273 2.25 14.25V11.1C2.25 10.7817 2.37643 10.4765 2.60147 10.2514C2.82652 10.0264 3.13174 9.89995 3.45 9.89995Z" fill="currentColor"/></svg>',
+  "tick": '<svg viewBox="0 0 11 11" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.67088 2.24582C9.74779 2.32247 9.80882 2.41354 9.85046 2.51382C9.8921 2.6141 9.91353 2.72162 9.91353 2.8302C9.91353 2.93878 9.8921 3.04629 9.85046 3.14657C9.80882 3.24685 9.74779 3.33793 9.67088 3.41457L4.76671 8.31874C4.69007 8.39565 4.59899 8.45668 4.49871 8.49832C4.39843 8.53996 4.29092 8.56139 4.18234 8.56139C4.07376 8.56139 3.96624 8.53996 3.86596 8.49832C3.76568 8.45668 3.67461 8.39565 3.59796 8.31874L1.32921 6.04999C1.17423 5.89501 1.08716 5.6848 1.08716 5.46562C1.08716 5.24643 1.17423 5.03623 1.32921 4.88124C1.4842 4.72625 1.69441 4.63918 1.91359 4.63918C2.13277 4.63918 2.34298 4.72625 2.49796 4.88124L4.18463 6.56332L8.50213 2.24582C8.57878 2.16891 8.66985 2.10789 8.77013 2.06625C8.87041 2.02461 8.97792 2.00317 9.08651 2.00317C9.19509 2.00317 9.3026 2.02461 9.40288 2.06625C9.50316 2.10789 9.59424 2.16891 9.67088 2.24582Z" fill="currentColor"/></svg>',
+  "check": '<svg viewBox="0 0 11 11" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.67088 2.24582C9.74779 2.32247 9.80882 2.41354 9.85046 2.51382C9.8921 2.6141 9.91353 2.72162 9.91353 2.8302C9.91353 2.93878 9.8921 3.04629 9.85046 3.14657C9.80882 3.24685 9.74779 3.33793 9.67088 3.41457L4.76671 8.31874C4.69007 8.39565 4.59899 8.45668 4.49871 8.49832C4.39843 8.53996 4.29092 8.56139 4.18234 8.56139C4.07376 8.56139 3.96624 8.53996 3.86596 8.49832C3.76568 8.45668 3.67461 8.39565 3.59796 8.31874L1.32921 6.04999C1.17423 5.89501 1.08716 5.6848 1.08716 5.46562C1.08716 5.24643 1.17423 5.03623 1.32921 4.88124C1.4842 4.72625 1.69441 4.63918 1.91359 4.63918C2.13277 4.63918 2.34298 4.72625 2.49796 4.88124L4.18463 6.56332L8.50213 2.24582C8.57878 2.16891 8.66985 2.10789 8.77013 2.06625C8.87041 2.02461 8.97792 2.00317 9.08651 2.00317C9.19509 2.00317 9.3026 2.02461 9.40288 2.06625C9.50316 2.10789 9.59424 2.16891 9.67088 2.24582Z" fill="currentColor"/></svg>',
+  "warning": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.99993 1.42505C9.31609 1.42485 9.62673 1.50792 9.90059 1.66591C10.1744 1.82391 10.4019 2.05124 10.5599 2.32505L17.3849 14.175C17.543 14.4488 17.6261 14.7593 17.6261 15.0753C17.626 15.3914 17.5428 15.7019 17.3846 15.9755C17.2265 16.2492 16.9991 16.4764 16.7253 16.6343C16.4515 16.7922 16.141 16.8753 15.8249 16.875H2.17493C1.85887 16.8753 1.54832 16.7922 1.27453 16.6343C1.00073 16.4764 0.773342 16.2492 0.615222 15.9755C0.457102 15.7019 0.37383 15.3914 0.373779 15.0753C0.373729 14.7593 0.456902 14.4488 0.614934 14.175L7.43993 2.32505C7.59801 2.05124 7.82542 1.82391 8.09928 1.66591C8.37313 1.50792 8.68377 1.42485 8.99993 1.42505ZM8.99993 5.55005C8.83914 5.54997 8.67997 5.58221 8.53188 5.64484C8.38379 5.70748 8.2498 5.79924 8.13787 5.91467C8.02593 6.03011 7.93834 6.16686 7.88029 6.3168C7.82223 6.46675 7.79491 6.62684 7.79993 6.78755L7.98743 10.2375C7.98743 10.5061 8.09411 10.7636 8.28399 10.9535C8.47387 11.1434 8.7314 11.25 8.99993 11.25C9.26847 11.25 9.526 11.1434 9.71588 10.9535C9.90576 10.7636 10.0124 10.5061 10.0124 10.2375L10.1999 6.78755C10.205 6.62684 10.1776 6.46675 10.1196 6.3168C10.0615 6.16686 9.97393 6.03011 9.862 5.91467C9.75006 5.79924 9.61607 5.70748 9.46798 5.64484C9.31989 5.58221 9.16072 5.54997 8.99993 5.55005ZM8.99993 12.3C8.84235 12.3 8.6863 12.3311 8.54071 12.3914C8.39512 12.4517 8.26284 12.5401 8.15141 12.6515C8.03997 12.763 7.95158 12.8952 7.89128 13.0408C7.83097 13.1864 7.79993 13.3425 7.79993 13.5C7.79993 13.6576 7.83097 13.8137 7.89128 13.9593C7.95158 14.1049 8.03997 14.2371 8.15141 14.3486C8.26284 14.46 8.39512 14.5484 8.54071 14.6087C8.6863 14.669 8.84235 14.7 8.99993 14.7C9.31819 14.7 9.62342 14.5736 9.84846 14.3486C10.0735 14.1235 10.1999 13.8183 10.1999 13.5C10.1999 13.1818 10.0735 12.8766 9.84846 12.6515C9.62342 12.4265 9.31819 12.3 8.99993 12.3Z" fill="currentColor"/></svg>',
+  "star": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.00023 15.9C8.70023 15.9 8.40773 15.795 8.17523 15.6C4.65023 12.675 1.95023 10.425 1.95023 7.57502C1.94697 6.75679 2.18713 5.95607 2.64016 5.2747C3.0932 4.59332 3.73864 4.06207 4.49441 3.74851C5.25019 3.43494 6.08214 3.35323 6.88447 3.51376C7.68681 3.67429 8.42328 4.06981 9.00023 4.65002C9.57718 4.06981 10.3136 3.67429 11.116 3.51376C11.9183 3.35323 12.7503 3.43494 13.506 3.74851C14.2618 4.06207 14.9073 4.59332 15.3603 5.2747C15.8133 5.95607 16.0535 6.75679 16.0502 7.57502C16.0502 10.425 13.3502 12.675 9.82523 15.6C9.59273 15.795 9.30023 15.9 9.00023 15.9Z" fill="currentColor"/></svg>',
+  "up": '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M10 2.16669C10.2646 2.16669 10.5187 2.27191 10.7042 2.45836L16.7875 8.54169C16.9318 8.66994 17.0484 8.82633 17.1301 9.00126C17.2117 9.17618 17.2568 9.36596 17.2624 9.55894C17.2681 9.75191 17.2343 9.94401 17.1631 10.1234C17.0918 10.3029 16.9846 10.4658 16.8481 10.6023C16.7116 10.7389 16.5486 10.846 16.3692 10.9173C16.1897 10.9885 15.9976 11.0224 15.8047 11.0167C15.6117 11.011 15.4219 10.9659 15.247 10.8843C15.0721 10.8026 14.9157 10.686 14.7875 10.5417L11.4167 7.17086V16.4167C11.4167 16.7924 11.2674 17.1527 11.0017 17.4184C10.7361 17.6841 10.3757 17.8334 10 17.8334C9.62429 17.8334 9.26395 17.6841 8.99828 17.4184C8.7326 17.1527 8.58335 16.7924 8.58335 16.4167V7.17086L5.21252 10.5417C5.08427 10.686 4.92788 10.8026 4.75295 10.8843C4.57803 10.9659 4.38825 11.011 4.19527 11.0167C4.0023 11.0224 3.8102 10.9885 3.63077 10.9173C3.45134 10.846 3.28837 10.7389 3.15185 10.6023C3.01534 10.4658 2.90817 10.3029 2.83692 10.1234C2.76568 9.94401 2.73186 9.75191 2.73754 9.55894C2.74322 9.36596 2.78827 9.17618 2.86995 9.00126C2.95163 8.82633 3.0682 8.66994 3.21252 8.54169L9.29585 2.45836C9.48135 2.27191 9.73543 2.16669 10 2.16669Z" fill="currentColor"/></svg>',
+  "comment": '<svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:100%"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.6 2.25C2.7 2.25 1.95 3 1.95 3.9V11.7C1.95 12.6 2.7 13.35 3.6 13.35H5.55V16.05C5.55 16.35 5.7 16.5 6 16.5C6.15 16.5 6.3 16.425 6.375 16.35L9.45 13.35H14.4C15.3 13.35 16.05 12.6 16.05 11.7V3.9C16.05 3 15.3 2.25 14.4 2.25H3.6Z" fill="currentColor"/></svg>',
+});
+
 const ic = (n,size,extra='') => `<span style="width:${size}px;height:${size}px;display:block;flex:0 0 auto;${extra}">${I[n]}</span>`;
 
 /* ── people ──────────────────────────────────────────────────────────── */
@@ -1225,7 +1264,7 @@ const S = {
   intent:null,                // saved write action across sign in
   draft:null,
   toast:null,
-  replying:false, reads:0, wallSeen:false, auth_mode:'in', detecting:false, roadDraft:null, mapPin:null, tileFail:false, mapPick:null, pickRoad:null,
+  primary:'#17130F', replying:false, reads:0, wallSeen:false, auth_mode:'in', detecting:false, roadDraft:null, mapPin:null, tileFail:false, mapPick:null, pickRoad:null,
   auth_err:'', auth_phone:'', auth_code:'', auth_name:'', auth_roads:['waterfield','waroda','chapel'],
   locTimer:null, focus:null,
 };
@@ -1452,12 +1491,11 @@ function voteRow(p, where){
     line = `<button data-a="wsw:${p.id}" class="majority"><b>${winner[1]}</b> people marked ${winner[0]} ${ic('chevron',11,'color:var(--mute)')}</button>`;
   }
   if (where==='row') return {votes:`${b('fixed','Fixed','tick',fixed)}${b('notfixed','Not fixed','cross',not)}`, line,
-    note: mine ? `You said ${mine.value==='fixed'?'fixed':'not fixed'} on ${fmtShort(mine.at)}. Tap it again to take it back.${mine.pending?' Held until you are back on.':''}` : (dormant(p)?'Nobody has answered in thirty days.':'')};
+    note: mine && mine.pending ? 'Held until you are back on.' : (dormant(p)?'No answers in thirty days.':'')};
   return `<div class="stack" style="gap:11px">
     <div class="votes">${b('fixed','Fixed','tick',fixed)}${b('notfixed','Not fixed','cross',not)}</div>
     ${line}
-    ${mine ? `<div class="small">You said ${mine.value==='fixed'?'fixed':'not fixed'} on ${fmtShort(mine.at)}. Tap it again to take it back.${mine.pending?' Held until you are back on.':''}</div>`:''}
-    ${dormant(p) ? `<div class="small">Nobody has answered in thirty days.</div>`:''}
+    ${mine && mine.pending ? `<div class="small">Held until you are back on.</div>`:''}
   </div>`;
 }
 
@@ -1497,9 +1535,6 @@ function pinCard(p, opts={}){
 
   if (p.kind==='issue'){
     parts.push(`<div style="margin-top:15px">${railCompact(p)}</div>`);
-    if (st==='sent' && voteOpen(p)) parts.push(`<div class="waitband" style="margin-top:14px">
-        <span class="w">Waiting ${days(p.created,S.now)} days</span>
-        ${a('share:'+p.id,'b', ic('share',15)+'Share')}</div>`);
     const [w,rest] = statusLine(p);
     parts.push(`<div class="statusline" style="margin-top:12px"><b>${w}</b>${rest?' '+esc(rest):''}
       ${st==='filed'? a('retry:'+p.id,'','<span style="color:var(--blueInk);font-weight:700;margin-left:8px">Send it now</span>') : ''}</div>`);
@@ -1512,23 +1547,21 @@ function pinCard(p, opts={}){
   const vr = open ? voteRow(p,'row') : null;
   const ma = myAnswer(p);
   const {fixed,not} = split(p);
-  const stack = (act,glyph,label,n,on,tone) => `<button data-a="${act}" class="astack ${on?'on':''}">
-      <span style="color:${on?tone:'var(--mid)'}">${ic(glyph,21)}</span>
-      <b style="color:${on?tone:'var(--body)'}">${label}${n!=null?' '+n:''}</b></button>`;
-  const foot = [];
-  if (open) foot.push(
-    stack('vote:'+p.id+':fixed',    ma&&ma.value==='fixed'   ?'tickF':'tickO','Fixed',    fixed, ma&&ma.value==='fixed',    'var(--greenInk)'),
-    stack('vote:'+p.id+':notfixed', ma&&ma.value==='notfixed'?'warning':'triO','Not fixed',not,   ma&&ma.value==='notfixed','var(--redInk)'));
-  foot.push('<span style="flex:1"></span>');
-  if (p.kind==='event') foot.push(stack('interest:'+p.id,'up','Interested',p.interested,p.interestedByMe,'var(--blueInk)'));
-  else foot.push(stack('support:'+p.id,'up','Support',p.supports,p.supported,'var(--blueInk)'));
-  foot.push(stack('open:'+p.id,'comment','Comment',replyCount(p),false,'var(--blueInk)'));
-  parts.push(`<div class="cardfoot" style="margin-top:11px;margin-left:-4px;margin-right:-4px">${foot.join('')}</div>`);
-  if (vr){
-    parts.push(`<div class="rule" style="margin-top:11px"></div>`);
-    parts.push(`<div style="margin-top:12px">${vr.line}${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}</div>`);
+  if (open){
+    const vb = (val,label,n,glyph,tone) => { const on = ma && ma.value===val;
+      return `<button data-a="vote:${p.id}:${val}" class="abtn ${val==='fixed'?'fx':'nfx'} ${on?'on':''}">
+        <span style="color:${on?'#fff':tone}">${ic(glyph,17)}</span>${label} <span class="n">${n}</span></button>`; };
+    parts.push(`<div class="actrow" style="margin-top:13px">
+      ${vb('fixed','Fixed',fixed,'tick','var(--green)')}${vb('notfixed','Not fixed',not,'cross','var(--red)')}</div>`);
+    parts.push(`<div style="margin-top:11px">${vr.line}
+      ${vr.note?`<div class="small" style="margin-top:6px">${esc(vr.note)}</div>`:''}</div>`);
   }
-
+  const back = p.kind==='event'
+    ? `<button data-a="interest:${p.id}" class="abtn small ${p.interestedByMe?'on':''}">${ic('up',17)}Interested <span class="n">${p.interested}</span></button>`
+    : `<button data-a="support:${p.id}" class="abtn small ${p.supported?'on':''}">${ic('up',17)}Support <span class="n">${p.supports}</span></button>`;
+  parts.push(`<div class="actrow" style="margin-top:${open?'13px':'12px'}">
+    ${back}<span style="flex:1"></span>
+    <button data-a="open:${p.id}" class="abtn small plain">${ic('comment',17)}Comment <span class="n">${replyCount(p)}</span></button></div>`);
   return `<div class="pincard" data-a="open:${p.id}">${parts.join('')}</div>`;
 }
 function pollBlock(p, inCard){
@@ -1593,33 +1626,51 @@ function gatherScreen(){
 function homeScreen(){
   const fresh = S.pins.filter(p=>days(p.created,S.now)<=2).length;
   const d = new Date(S.now);
+  const r = S.currentRoad ? road(S.currentRoad) : null;
   const items = storyItems();
-  const card = (p,i,style) => `<button data-a="story:${i}" style="position:absolute;${style};background:var(--blueSoft);
-      border-radius:22px;padding:6px;box-shadow:0 6px 14px rgba(23,20,15,.10)">
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const card = (p,i,x,y) => `<button data-a="story:${i}" style="position:absolute;left:${x}px;top:${y}px;width:226px;height:241px;
+      border-radius:45px;border:11px solid var(--blueSoft);background:var(--blueSoft);overflow:hidden;padding:0">
       ${p.photos&&p.photos.length
-        ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;display:block">`
-        : `<span style="width:100%;height:100%;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--blueInk)">${ic(MICO[p.kind]||'place',34)}</span>`}
+        ? `<img src="${p.photos[0]}" style="width:100%;height:100%;object-fit:cover;border-radius:34px;display:block">`
+        : `<span style="width:100%;height:100%;border-radius:34px;background:#fff;display:flex;align-items:center;justify-content:center;color:var(--ink)">${ic(MICO[p.kind]||'place',44)}</span>`}
     </button>`;
-  const deck = items.length ? `<div style="position:relative;height:232px;margin-top:26px">
-      ${items[2]?card(items[2],2,'left:0;top:26px;width:118px;height:196px'):''}
-      ${items[1]?card(items[1],1,'left:66px;top:14px;width:128px;height:212px'):''}
-      ${card(items[0],0,'left:140px;top:0;width:206px;height:232px')}
-    </div>
-    <div style="display:flex;margin-top:22px">
-      <span style="flex:1"></span>
-      ${a('story:0','','<span style="width:56px;height:56px;border-radius:999px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center">'+ic('chevron',16)+'</span>')}
+  const deck = items.length ? `<div style="position:relative;width:354px;height:264px">
+      ${items[2]?card(items[2],2,0,23):''}
+      ${items[1]?card(items[1],1,64,11):''}
+      ${card(items[0],0,128,0)}
     </div>` : '';
-  return `<div class="header"><button data-a="roads" style="text-align:left">
-      <div style="display:flex;gap:6px;align-items:center"><b class="subhead">${S.currentRoad?esc(road(S.currentRoad).label||road(S.currentRoad).name):'Home'}</b>${ic('chevdown',14)}</div>
-      <div class="meta trunc" style="max-width:210px">${S.currentRoad?esc(road(S.currentRoad).address):'Bandra West'}</div></button>
-    <div style="display:flex;gap:10px;align-items:center">${a('map','circbtn tapfx',ic('map',18))}
-      ${S.auth==='out'?a('signin','pill','Sign in','style="background:#fff;border:1px solid var(--line);padding:11px 18px;font-size:14px"'):`<img class="avatar" style="width:38px;height:38px" src="${P.me.av}">`}</div></div>
-    <div class="scroll"><div style="padding:8px 20px 150px">
-      <div class="meta">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]},</div>
-      <div class="h2" style="margin-top:6px;font-size:31px;line-height:38px">Welcome back</div>
-      <div class="h2" style="font-size:31px;line-height:38px"><span style="color:var(--blue)">${fresh} new</span> updates</div>
-      ${deck}
-      <div class="endfeed" style="padding-top:26px">That is the last day on your four roads</div>
+  return `<div class="scroll"><div style="padding:8px 18px 20px;position:relative">
+      <div style="position:absolute;left:-18px;right:-18px;top:-60px;height:420px;pointer-events:none;
+        background:radial-gradient(120% 70% at 50% 0%, var(--blueSoft) 0%, rgba(0,0,0,0) 72%);opacity:.9"></div>
+      <div style="position:relative">
+      <div style="display:flex;align-items:flex-start;height:48px">
+        <button data-a="roads" style="flex:1;min-width:0;text-align:left;display:flex;flex-direction:column;gap:-4px">
+          <span style="display:flex;align-items:center;gap:6px;height:24px">
+            <b style="font-size:19px;line-height:24px;letter-spacing:-.4px">${r?esc(r.label||r.name):'Home'}</b>${ic('chevdown',16)}</span>
+          <span class="trunc" style="font-size:16px;line-height:21px;color:var(--mid);max-width:245px">${r?esc(r.address):'Bandra West'}</span>
+        </button>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${a('map','','<span style="width:51px;height:48px;border-radius:33px;background:#fff;border:1px solid #CFCFCF;display:flex;align-items:center;justify-content:center">'+ic('map',20)+'</span>')}
+          ${S.auth==='out'
+            ? a('signin','pill','Sign in','style="background:#fff;border:1px solid var(--line);padding:13px 18px;font-size:14px"')
+            : `<img class="avatar" style="width:48px;height:48px" src="${P.me.av}">`}
+        </div>
+      </div>
+      <div style="padding:44px 0 12px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="font-size:16px;line-height:21px;color:#4A4A44">${DAYS[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]},</div>
+          <div style="font-size:36px;line-height:38px;font-weight:500;letter-spacing:-.6px">Welcome back</div>
+          <div style="font-size:36px;line-height:38px;font-weight:500;letter-spacing:-.6px">
+            <span style="color:var(--red)">${fresh} New</span> Updates!</div>
+        </div>
+        ${deck}
+        <div style="display:flex">
+          <span style="flex:1"></span>
+          ${a('story:0','','<span style="width:55px;height:50px;border-radius:18px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center">'+ic('chevron',18)+'</span>')}
+        </div>
+      </div>
+      </div>
     </div></div>`;
 }
 function searchScreen(){
@@ -1670,7 +1721,7 @@ function searchScreen(){
 function bottomBar(){
   const t = (k,glyph,label) => `<button data-a="tab:${k}" class="tab ${S.tab===k?'on':''}">${ic(glyph,20)}${S.tab===k?`<b>${label}</b>`:''}</button>`;
   if (S.auth==='out')
-    return `<div class="dock"><div class="bottombar">${t('explore','explore','Explore')}</div></div>`
+    return `<div class="dock"><div class="bottombar">${t('explore','explore','Explore')}${t('search','search','Search')}</div></div>`
       + a('compose','addpin tapfx',ic('plus',25,'color:#fff'));
   return `<div class="dock"><div class="bottombar">
     ${t('home','home','Home')}${t('explore','explore','Explore')}${t('gather','gather','Gather')}${t('search','search','Search')}
@@ -1686,9 +1737,15 @@ function pinScreen(id){
   const parts = [];
   parts.push(`<div style="display:flex;justify-content:space-between;padding:0 20px">
     ${a('back','circbtn tapfx',ic('back',18))}${a('share:'+p.id,'circbtn tapfx',ic('share',17))}</div>`);
-  parts.push(`<div style="padding:16px 20px 0"><div class="metaQ">${esc(r.name)}${p.spot?', '+esc(p.spot):''} · put up ${fmtDay(p.created)}</div>
-    <div class="h1" style="margin-top:10px;line-height:31px;font-size:24px">${esc(p.title)}</div>
-    <div class="body mid" style="margin-top:6px">${esc(p.text)}</div></div>`);
+  const KIND={issue:'Civic',event:'Gather',sale:'For sale',ask:'Ask'}[p.kind]||'Pin';
+  parts.push(`<div style="padding:18px 20px 0">
+    <div style="display:flex;align-items:baseline;gap:8px">
+      <span style="font-size:13px;font-weight:600;color:var(--blueInk)">${KIND}</span>
+      <span class="meta">${p.kind==='issue'?'Reported':'Put up'} ${fmtDay(p.created)}</span>
+      <span style="flex:1"></span>
+      ${p.author==='me'?`<span class="meta">By you</span>`:''}</div>
+    <div class="h2" style="margin-top:9px;font-size:28px;line-height:35px">${esc(p.title)}</div>
+    <div class="body" style="margin-top:8px">${esc(p.text)}</div></div>`);
   if (au) parts.push(`<div style="padding:14px 20px 0"><div style="display:flex;gap:10px;align-items:center">
     ${avatarEl(au,32)}<div><div class="bodyStrong" style="font-size:13px">${esc(au.name)}</div>
     <div class="small">${(()=>{const ma=S.answers.find(x=>x.pinId===p.id&&x.userId===p.author);
@@ -1732,6 +1789,11 @@ function pinScreen(id){
       <button data-a="interest:${p.id}" class="pill" style="background:var(--blue);color:#fff;padding:10px 16px;font-size:14px">
         ${p.interestedByMe?'Interested':'I am interested'}</button></div></div>`);
 
+  parts.push(`<div style="padding:16px 20px 0;display:flex;gap:12px;align-items:center">
+    <span style="width:38px;height:38px;border-radius:999px;background:var(--paper);border:1px solid var(--line);
+      color:var(--mid);display:flex;align-items:center;justify-content:center;flex:0 0 auto">${ic('place',17)}</span>
+    <span style="flex:1;min-width:0"><span class="bodyStrong" style="display:block;font-size:15px">${esc(r.name)}${p.spot?', '+esc(p.spot):''}</span>
+    <span class="meta">${p.anon?'Pinned by a neighbour':'Pinned by '+esc(person(p.author).name)}, ${fmtDay(p.created)}</span></span></div>`);
   parts.push(locSnippet(p));
   parts.push(`<div style="padding:16px 20px 0"><div class="card" style="border-color:var(--edge);padding:16px 16px 6px">
     <div style="display:flex;gap:8px;align-items:baseline"><span class="subhead">Replies</span>
@@ -1753,7 +1815,8 @@ function pinScreen(id){
   return `<div class="scroll"><div style="padding-bottom:190px">${parts.join('')}</div></div>
     <div class="dock"><div style="padding:0 16px 12px">${actionStrip(p)}</div>
       <div class="bottombar" style="margin:0 auto">
-        ${['home|home|Home','explore|explore|Explore','gather|gather|Gather','search|search|Search'].map(s=>{const [k,g,l]=s.split('|');
+        ${(S.auth==='out'?['explore|explore|Explore','search|search|Search']
+          :['home|home|Home','explore|explore|Explore','gather|gather|Gather','search|search|Search']).map(s=>{const [k,g,l]=s.split('|');
         return `<button data-a="tab:${k}" class="tab ${S.tab===k?'on':''}">${ic(g,20)}${S.tab===k?`<b>${l}</b>`:''}</button>`}).join('')}
       </div></div>`;
 }
@@ -2068,6 +2131,37 @@ function locSnippet(p){
 }
 
 
+
+/* ── the accent, one hue, everything else neutral ────────────────────── */
+function hexToHsl(h){
+  h=h.replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join('');
+  const r=parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let hu=0, sa=0; const l=(mx+mn)/2;
+  if(mx!==mn){ const d=mx-mn; sa=l>0.5?d/(2-mx-mn):d/(mx+mn);
+    hu = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4; hu*=60; }
+  return [hu, sa*100, l*100];
+}
+function hsl(h,s,l){
+  s/=100; l/=100;
+  const k=n=>(n+h/30)%12, a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  const g=v=>Math.round(v*255).toString(16).padStart(2,'0');
+  return '#'+g(f(0))+g(f(8))+g(f(4));
+}
+function setPrimary(hex){
+  S.primary=hex;
+  const [h,sa,l]=hexToHsl(hex);
+  const S1=Math.max(sa,45);
+  const r=document.documentElement.style;
+  r.setProperty('--blue',     hex);
+  r.setProperty('--blueDeep', hsl(h,S1,Math.max(l-8,18)));
+  r.setProperty('--blueInk',  hsl(h,Math.min(S1+6,100),Math.max(l-15,14)));
+  r.setProperty('--blueSoft', hsl(h,Math.min(S1,85),96));
+  r.setProperty('--blueEdge', hsl(h,Math.min(S1,80),86));
+  r.setProperty('--blueLift', hsl(h,Math.min(S1,90),72));
+  const sw=document.getElementById('devSwatch'); if(sw) sw.style.background=hex;
+}
+
 /* ── the action strip, stuck to the bottom of a pin ──────────────────── */
 function actionStrip(p){
   if (S.replying) return `<div class="actbar">
@@ -2076,22 +2170,20 @@ function actionStrip(p){
       style="flex:1;padding:8px 4px 8px 12px;font-size:14px">
     <button data-a="postcomment:${p.id}" style="background:var(--ink);padding:12px;border-radius:999px;display:flex;
       opacity:${(S.commentDraft||'').trim()?1:.35}">${ic('send',18,'color:var(--paper)')}</button></div>`;
-  const mine = myAnswer(p);
+  const ma = myAnswer(p);
   const {fixed,not} = split(p);
-  const stack = (act,glyph,label,n,on,tone) => `<button data-a="${act}" class="astack ${on?'on':''}">
-      <span style="color:${on?tone:'var(--mid)'}">${ic(glyph,22)}</span>
-      <b style="color:${on?tone:'var(--body)'}">${label}${n!=null?' '+n:''}</b></button>`;
+  const vb = (val,label,n,glyph,tone) => { const on = ma && ma.value===val;
+    return `<button data-a="vote:${p.id}:${val}" class="abtn ${val==='fixed'?'fx':'nfx'} ${on?'on':''}">
+      <span style="color:${on?'#fff':tone}">${ic(glyph,17)}</span>${label} <span class="n">${n}</span></button>`; };
   const votes = (p.kind==='issue' && voteOpen(p))
-    ? stack('vote:'+p.id+':fixed',    mine&&mine.value==='fixed'   ?'tickF':'tickO','Fixed',    fixed, mine&&mine.value==='fixed',    'var(--greenInk)')
-    + stack('vote:'+p.id+':notfixed', mine&&mine.value==='notfixed'?'warning':'triO','Not fixed',not,   mine&&mine.value==='notfixed','var(--redInk)')
+    ? vb('fixed','Fixed',fixed,'tick','var(--green)') + vb('notfixed','Not fixed',not,'cross','var(--red)') + '<span class="actsep"></span>'
     : '';
   const back = p.kind==='event'
-    ? stack('interest:'+p.id,'up','Interested',p.interested,p.interestedByMe,'var(--blueInk)')
-    : stack('support:'+p.id,'up','Support',p.supports,p.supported,'var(--blueInk)');
-  return `<div class="actbar">${votes}<span style="flex:1"></span>${back}
-    ${stack('startreply','comment','Comment',replyCount(p),false,'var(--blueInk)')}</div>`;
+    ? `<button data-a="interest:${p.id}" class="abtn small plain ${p.interestedByMe?'on':''}">${ic('up',18)}<span class="n">${p.interested}</span></button>`
+    : `<button data-a="support:${p.id}" class="abtn small plain ${p.supported?'on':''}">${ic('up',18)}<span class="n">${p.supports}</span></button>`;
+  return `<div class="actbar">${votes}${votes?'':'<span style="flex:1"></span>'}${back}
+    <button data-a="startreply" class="abtn small plain">${ic('comment',18)}<span class="n">${replyCount(p)}</span></button></div>`;
 }
-
 /* ── the story ───────────────────────────────────────────────────────── */
 function storyItems(){
   const l = S.pins.slice().sort((a,b)=>(b.wardLast||b.created)-(a.wardLast||a.created));
@@ -2515,7 +2607,8 @@ function view(){
   const t = topR();
   let body;
   if (t.n==='tabs'){
-    body = (S.tab==='home'?homeScreen():S.tab==='explore'?feedScreen():S.tab==='gather'?gatherScreen():searchScreen()) + bottomBar();
+    const tab = (S.auth==='out' && (S.tab==='home'||S.tab==='gather')) ? 'explore' : S.tab;
+    body = (tab==='home'?homeScreen():tab==='explore'?feedScreen():tab==='gather'?gatherScreen():searchScreen()) + bottomBar();
   }
   else if (t.n==='pin')      body = pinScreen(t.id);
   else if (t.n==='composer') return statusBar()+composerScreen()+sheetLayer();
@@ -2854,6 +2947,20 @@ function renderDev(){
     <div class="st">${new Date(S.now).toDateString()}<br>
       auth <b>${S.auth}</b> · location <b>${S.loc}</b> · road <b>${S.currentRoad?road(S.currentRoad).name:'none'}</b><br>
       network <b>${S.offline?'off':'on'}</b>${S.force?` · forcing <b>${S.force}</b>`:''}</div>
+    <div class="g"><b>Primary colour</b>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <label style="position:relative;width:38px;height:38px;border-radius:10px;border:1px solid #DDD7CC;overflow:hidden;flex:0 0 auto">
+          <span id="devSwatch" style="position:absolute;inset:0;background:${S.primary||'#17130F'}"></span>
+          <input type="color" id="devColor" value="${S.primary||'#17130F'}"
+            style="position:absolute;inset:-6px;width:150%;height:150%;border:0;padding:0;opacity:0;cursor:pointer"></label>
+        <input type="range" id="devHue" min="0" max="360" value="${Math.round(hexToHsl(S.primary||'#17130F')[0])}"
+          style="flex:1;height:22px;border-radius:6px;-webkit-appearance:none;appearance:none;
+          background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)">
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        ${['#2563EB','#0F766E','#B45309','#B91C1C','#4338CA','#166534','#111827'].map(c=>
+          `<button data-d="col:${c.slice(1)}" style="width:26px;height:26px;padding:0;border-radius:8px;background:${c};border:1px solid rgba(0,0,0,.12)"></button>`).join('')}
+      </div></div>
     <div class="g"><b>Time</b>${b('day1','+1 day')}${b('day7','+7 days')}${b('day30','+30 days')}</div>
     <div class="g"><b>Ward acts on ${esc(pin(openPin)?pin(openPin).title.slice(0,22):'')}…</b>
       ${b('w:ack','Acknowledge')}${b('w:prog','In progress')}${b('w:done','Marked done')}</div>
@@ -2879,6 +2986,7 @@ document.getElementById('dev').addEventListener('click', e=>{
   if (e.target.id==='dev'){ devOpen(false); return; }
   const el = e.target.closest('[data-d]'); if (!el) return;
   if (el.dataset.d==='devclose'){ devOpen(false); return; }
+  if (el.dataset.d && el.dataset.d.startsWith('col:')){ setPrimary('#'+el.dataset.d.slice(4)); renderDev(); return; }
   const [c,arg] = el.dataset.d.split(':');
   const openPin = topR().n==='pin' ? topR().id : 'pothole';
   if (c==='day1') advance(1);
@@ -2901,6 +3009,13 @@ document.getElementById('dev').addEventListener('click', e=>{
 
 /* the master control opens from the tab on the right edge */
 function devOpen(on){ document.getElementById('dev').classList.toggle('on', on); if (on) renderDev(); }
+document.addEventListener('input', e=>{
+  if (e.target.id==='devColor'){ setPrimary(e.target.value);
+    const hu=document.getElementById('devHue'); if(hu) hu.value=Math.round(hexToHsl(e.target.value)[0]); return; }
+  if (e.target.id==='devHue'){ const [h,sa,l]=hexToHsl(S.primary||'#17130F');
+    const hex=hsl(+e.target.value, Math.max(sa,55), Math.min(Math.max(l,38),58));
+    setPrimary(hex); const c=document.getElementById('devColor'); if(c) c.value=hex; return; }
+});
 (function(){
   const tab=document.getElementById('cc');
   tab.addEventListener('click', ()=>{
